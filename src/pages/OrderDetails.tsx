@@ -1,5 +1,5 @@
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, CreditCard, XCircle, Upload } from 'lucide-react';
+import { ArrowLeft, MapPin, CreditCard, XCircle, Upload, CheckCircle, Loader } from 'lucide-react';
 import { useEffect } from 'react';
 import { EmptyState } from '../components/AsyncState';
 import { cartItems, formatPrice, getId, productImage, productPrice, productSlug } from '../lib/format';
@@ -28,6 +28,10 @@ export default function OrderDetails() {
   if (loading && !order) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><EmptyState title="Loading order..." /></div>;
   if (!order) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><EmptyState title="Order not found" body={error || 'We could not find this order.'} /></div>;
 
+  const proofImage = typeof order.payment === 'object' && order.payment && 'proofImage' in order.payment
+    ? String((order.payment as { proofImage?: string }).proofImage || '')
+    : '';
+
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-10 py-12 pb-32">
       <Link to="/orders" className="inline-flex items-center gap-2 text-zinc-400 hover:text-primary transition-colors mb-12 group">
@@ -41,8 +45,12 @@ export default function OrderDetails() {
           <p className="text-lg text-zinc-400">Placed on {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          {order.orderStatus === 'pending_payment' ? <button onClick={cancel} className="bg-zinc-900 text-white font-black uppercase py-4 px-8 rounded-full border border-zinc-700 hover:border-primary hover:text-primary transition-all flex items-center gap-2"><XCircle size={18} />Cancel</button> : null}
-          <button onClick={() => navigate(`/payment/${getId(order)}`)} className="bg-primary text-white font-black uppercase py-4 px-8 rounded-full hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all flex items-center gap-2"><Upload size={18} />Payment</button>
+          {order.orderStatus === 'pending_payment' ? <button onClick={cancel} className="bg-zinc-900 text-white font-black uppercase py-4 px-8 rounded-full border border-zinc-700 hover:border-primary hover:text-primary transition-all flex items-center gap-2 cursor-pointer"><XCircle size={18} />Cancel</button> : null}
+          {order.orderStatus === 'pending_payment' ? <button onClick={() => navigate(`/payment/${getId(order)}`)} className="bg-primary text-white font-black uppercase py-4 px-8 rounded-full hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all flex items-center gap-2 cursor-pointer"><Upload size={18} />Payment</button> : null}
+          {order.paymentStatus === 'awaiting_review' ? <div className="flex items-center gap-2 bg-zinc-900 text-white font-black uppercase py-4 px-8 rounded-full border border-zinc-700 cursor-not-allowed"><Loader size={18} />Processing</div> : null}
+          {order.orderStatus === 'cancelled' ? <div className="flex items-center gap-2 bg-zinc-900 text-white font-black uppercase py-4 px-8 rounded-full border border-zinc-700 cursor-not-allowed"><XCircle size={18} />Canceled</div> : null}
+          {order.paymentStatus === 'paid' ? <div className="flex items-center gap-2 bg-zinc-900 text-white font-black uppercase py-4 px-8 rounded-full border border-zinc-700 cursor-not-allowed"><CheckCircle size={18} />Paid</div> : null}
+          {proofImage ? <img src={proofImage} alt="Proof" className="w-20 h-20 object-cover" /> : null}
         </div>
       </div>
 
@@ -59,21 +67,24 @@ export default function OrderDetails() {
           <section className="bg-zinc-950 p-10 border border-zinc-800">
             <h2 className="text-2xl font-black text-white uppercase mb-10 border-b border-zinc-800 pb-6 tracking-tight">Items</h2>
             <div className="space-y-8">
-              {cartItems(order).map((item) => (
-                <div key={item._id || item.id || item.productId} className="flex gap-6 group">
-                  <div className="w-24 h-24 bg-black border border-zinc-900 shrink-0 overflow-hidden">
-                    <img src={productImage(item.product)} alt={item.product?.name || 'Product'} className="w-full h-full object-contain p-4 grayscale group-hover:grayscale-0 transition-all" />
-                  </div>
-                  <div className="flex-1 flex justify-between items-start gap-4">
-                    <div>
-                      <h3 className="text-lg font-black text-white uppercase mb-2 group-hover:text-primary transition-colors cursor-pointer" onClick={() => item.product && navigate(`/product/${productSlug(item.product)}`)}>{item.product?.name || 'Product'}</h3>
-                      {item.selectedFlavor ? <p className="text-sm text-zinc-500 uppercase font-bold tracking-widest mb-1">Flavor: {item.selectedFlavor}</p> : null}
-                      <p className="text-sm text-zinc-500 uppercase font-bold tracking-widest">Qty: {item.quantity || 1}</p>
+              {cartItems(order).map((item) => {
+                const product = item.product;
+                return (
+                  <div key={item._id || item.id || item.productId} className="flex gap-6 group">
+                    <div className="w-24 h-24 bg-black border border-zinc-900 shrink-0 overflow-hidden">
+                      <img src={productImage(product)} alt={product?.name || 'Product'} className="w-full h-full object-contain p-4 grayscale group-hover:grayscale-0 transition-all" />
                     </div>
-                    <span className="text-xl font-black text-white">{formatPrice(productPrice(item.product) * Number(item.quantity || 1))}</span>
+                    <div className="flex-1 flex justify-between items-start gap-4">
+                      <div>
+                        <h3 className="text-lg font-black text-white uppercase mb-2 group-hover:text-primary transition-colors cursor-pointer" onClick={() => product && navigate(`/product/${productSlug(product)}`)}>{product?.name || 'Product'}</h3>
+                        {item.selectedFlavor ? <p className="text-sm text-zinc-500 uppercase font-bold tracking-widest mb-1">Flavor: {item.selectedFlavor}</p> : null}
+                        <p className="text-sm text-zinc-500 uppercase font-bold tracking-widest">Qty: {item.quantity || 1}</p>
+                      </div>
+                      <span className="text-xl font-black text-white">{formatPrice(productPrice(product) * Number(item.quantity || 1))}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         </div>

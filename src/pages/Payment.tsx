@@ -52,11 +52,27 @@ export default function Payment() {
 
       <form onSubmit={submit} className="mt-8 border border-zinc-800 bg-zinc-950 p-8 space-y-4">
         <h2 className="text-2xl font-black uppercase text-white">Submit Proof</h2>
-        <input type="file" accept="image/*" onChange={(event) => setFile(event.target.files?.[0] || null)} className="w-full bg-zinc-900 border border-zinc-800 p-4 text-white" />
-        <input value={form.transactionReference} onChange={(event) => setForm({ ...form, transactionReference: event.target.value })} placeholder="Transaction reference" className="w-full bg-zinc-900 border border-zinc-800 p-4 text-white" />
-        <input value={form.senderPhone} onChange={(event) => setForm({ ...form, senderPhone: event.target.value })} placeholder="Sender phone" className="w-full bg-zinc-900 border border-zinc-800 p-4 text-white" />
-        <input value={form.senderName} onChange={(event) => setForm({ ...form, senderName: event.target.value })} placeholder="Sender name" className="w-full bg-zinc-900 border border-zinc-800 p-4 text-white" />
-        <input value={form.paidAmount} onChange={(event) => setForm({ ...form, paidAmount: event.target.value })} type="number" placeholder="Paid amount" className="w-full bg-zinc-900 border border-zinc-800 p-4 text-white" />
+        <label className="group flex min-h-40 cursor-pointer flex-col items-center justify-center gap-4 border-2 border-dashed border-zinc-800 bg-zinc-900/60 p-6 text-center transition-all hover:border-primary hover:bg-primary/5">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(event) => setFile(event.target.files?.[0] || null)}
+            className="sr-only"
+          />
+          <span className="flex h-14 w-14 items-center justify-center rounded-full border border-zinc-700 bg-black text-zinc-300 transition-colors group-hover:border-primary group-hover:text-primary">
+            <Upload size={22} />
+          </span>
+          <span className="text-sm font-black uppercase tracking-widest text-white">
+            {file ? file.name : 'Upload payment proof (mandatory)'}
+          </span>
+          <span className="max-w-sm text-xs font-medium text-zinc-500">
+            JPG, PNG, or WebP image. The file will be sent as proofImage.
+          </span>
+        </label>
+        <input value={form.transactionReference} onChange={(event) => setForm({ ...form, transactionReference: event.target.value })} placeholder="Transaction reference (optional)" className="w-full bg-zinc-900 border border-zinc-800 p-4 text-white" />
+        <input value={form.senderPhone} onChange={(event) => setForm({ ...form, senderPhone: event.target.value })} placeholder="Sender phone (optional)" className="w-full bg-zinc-900 border border-zinc-800 p-4 text-white" />
+        <input value={form.senderName} onChange={(event) => setForm({ ...form, senderName: event.target.value })} placeholder="Sender name (optional)" className="w-full bg-zinc-900 border border-zinc-800 p-4 text-white" />
+        <input value={form.paidAmount} onChange={(event) => setForm({ ...form, paidAmount: event.target.value })} type="number" placeholder="Paid amount (optional)" className="w-full bg-zinc-900 border border-zinc-800 p-4 text-white" />
         <button disabled={loading} className="w-full rounded-full bg-primary py-4 font-black uppercase text-white disabled:opacity-60 flex items-center justify-center gap-2"><Upload size={18} />Submit Proof</button>
       </form>
     </div>

@@ -5,6 +5,33 @@ import { EmptyState } from '../components/AsyncState';
 import { formatPrice, getId } from '../lib/format';
 import { useCheckoutStore } from '../stores/checkout.store';
 
+const ORDER_STATUS_STYLES: Record<string, string> = {
+  pending_payment: 'bg-amber-950 text-amber-200 border border-amber-700/60',
+  payment_submitted: 'bg-sky-950 text-sky-200 border border-sky-700/60',
+  confirmed: 'bg-emerald-950 text-emerald-200 border border-emerald-700/60',
+  processing: 'bg-indigo-950 text-indigo-200 border border-indigo-700/60',
+  shipped: 'bg-blue-950 text-blue-200 border border-blue-700/60',
+  delivered: 'bg-green-950 text-green-200 border border-green-700/60',
+  cancelled: 'bg-zinc-900 text-zinc-300 border border-zinc-700',
+  refunded: 'bg-purple-950 text-purple-200 border border-purple-700/60',
+  payment_rejected: 'bg-red-950 text-red-200 border border-red-700/60',
+};
+
+const PAYMENT_STATUS_STYLES: Record<string, string> = {
+  pending: 'bg-amber-950 text-amber-200 border border-amber-700/60',
+  awaiting_review: 'bg-sky-950 text-sky-200 border border-sky-700/60',
+  paid: 'bg-emerald-950 text-emerald-200 border border-emerald-700/60',
+  rejected: 'bg-red-950 text-red-200 border border-red-700/60',
+  failed: 'bg-rose-950 text-rose-200 border border-rose-700/60',
+  refunded: 'bg-purple-950 text-purple-200 border border-purple-700/60',
+};
+
+const BADGE_BASE = 'px-3 py-1 rounded-sm font-black text-[10px] uppercase tracking-widest';
+
+function statusLabel(status?: string) {
+  return status?.replace(/_/g, ' ') || 'pending';
+}
+
 export default function Orders() {
   const navigate = useNavigate();
   const { orders, loading, error, fetchMyOrders } = useCheckoutStore();
@@ -28,15 +55,21 @@ export default function Orders() {
             <div className="flex flex-col gap-4 w-full md:w-auto">
               <div className="flex items-center gap-4">
                 <h3 className="text-xl font-black text-white uppercase">#{order.orderNumber || getId(order).slice(-8)}</h3>
-                <span className="px-3 py-1 rounded-sm font-black text-[10px] uppercase tracking-widest bg-zinc-800 text-zinc-300">{order.orderStatus || 'pending'}</span>
+                <span className={`${BADGE_BASE} ${ORDER_STATUS_STYLES[order.orderStatus || 'pending_payment'] || 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+                  Order: {statusLabel(order.orderStatus)}
+                </span>
+                <span className={`${BADGE_BASE} ${PAYMENT_STATUS_STYLES[order.paymentStatus || 'pending'] || 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+                  Payment: {statusLabel(order.paymentStatus)}
+                </span>
               </div>
+              
               <div className="flex flex-wrap gap-x-12 gap-y-2 text-sm text-zinc-400 font-medium">
                 <span>Date: {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</span>
                 <span>Total: {formatPrice(order.total)}</span>
                 <span>Items: {order.items?.length || 0}</span>
               </div>
             </div>
-            <button onClick={() => navigate(`/order/${getId(order)}`)} className="w-full md:w-auto bg-transparent text-white border border-zinc-700 hover:border-primary hover:text-primary px-8 py-3 rounded-full font-black uppercase text-xs tracking-widest transition-all">
+            <button onClick={() => navigate(`/order/${getId(order)}`)} className="w-full md:w-auto bg-transparent text-white border border-zinc-700 hover:border-primary hover:text-primary px-8 py-3 rounded-full font-black uppercase text-xs tracking-widest transition-all cursor-pointer">
               View Details
             </button>
           </motion.div>
