@@ -1,98 +1,121 @@
-import { useState } from 'react';
-import { motion } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
-import { PRODUCTS } from '../constants';
-
-const CATEGORIES = ['All Products', 'Pre-Workout', 'Protein', 'Recovery', 'Stacks'];
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Search } from 'lucide-react';
+import { EmptyState, LoadingGrid } from '../components/AsyncState';
+import ProductCard from '../components/ProductCard';
+import { getId, getName } from '../lib/format';
+import { useToast } from '../lib/toast';
+import { useAuthStore } from '../stores/auth.store';
+import { useCartStore } from '../stores/cart.store';
+import { useCatalogStore } from '../stores/catalog.store';
+import { Product } from '../types';
 
 export default function Products() {
-  const [activeCategory, setActiveCategory] = useState('All Products');
-  const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const [search, setSearch] = useState(params.get('search') || '');
+  const { products, categories, brands, filters, pagination, loading, error, fetchProducts, fetchCategories, fetchBrands } = useCatalogStore();
+  const { addItem } = useCartStore();
+  const { isAuthenticated } = useAuthStore();
+  const { notify } = useToast();
 
-  const filteredProducts = PRODUCTS.filter(p => 
-    activeCategory === 'All Products' || p.category.toLowerCase() === activeCategory.toLowerCase()
-  );
+  const activeFilters = useMemo(() => ({
+    category: params.get('category') || '',
+    brand: params.get('brand') || '',
+    search: params.get('search') || '',
+    page: Number(params.get('page') || 1),
+    limit: 12,
+    sort: params.get('sort') || '-createdAt',
+    minPrice: params.get('minPrice') || '',
+    maxPrice: params.get('maxPrice') || '',
+    isStack: params.get('isStack') || '',
+  }), [params]);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchBrands();
+  }, [fetchBrands, fetchCategories]);
+
+  useEffect(() => {
+    fetchProducts(activeFilters);
+  }, [activeFilters, fetchProducts]);
+
+  const updateParam = (key: string, value: string | number) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, String(value));
+    else next.delete(key);
+    if (key !== 'page') next.set('page', '1');
+    setParams(next);
+  };
+
+  const handleAdd = async (product: Product) => {
+    if (!isAuthenticated) {
+      notify('Please log in to add items to your cart.', 'error');
+      return;
+    }
+    const productId = getId(product);
+    const selectedFlavor = product.flavors?.length === 1 ? product.flavors[0] : undefined;
+    if (product.flavors && product.flavors.length > 1) {
+      notify('Choose a flavor on the product page first.', 'info');
+      return;
+    }
+    await addItem(productId, 1, selectedFlavor);
+    notify('Added to cart.', 'success');
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-10 py-24">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-        <h1 className="text-5xl md:text-6xl font-black text-white uppercase tracking-tighter">
-          Gear Up
-        </h1>
+      <header className="flex flex-col gap-8 mb-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <h1 className="text-5xl md:text-6xl font-black text-white uppercase tracking-tighter">Gear Up</h1>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              updateParam('search', search);
+            }}
+            className="relative w-full md:w-96"
+          >
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
+            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search products" className="w-full rounded-full border border-zinc-800 bg-zinc-950 py-3 pl-11 pr-4 text-white outline-none focus:border-primary" />
+          </form>
+        </div>
 
-        <div className="flex flex-wrap gap-3">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-8 py-3 rounded-full font-bold uppercase transition-all border-2 ${
-                activeCategory === cat
-                  ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20'
-                  : 'bg-transparent border-zinc-800 text-zinc-400 hover:border-primary hover:text-white'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <select value={activeFilters.category} onChange={(event) => updateParam('category', event.target.value)} className="bg-zinc-950 border border-zinc-800 p-3 text-white">
+            <option value="">All categories</option>
+            {categories.map((category) => <option key={getId(category)} value={getId(category)}>{getName(category)}</option>)}
+          </select>
+          <select value={activeFilters.brand} onChange={(event) => updateParam('brand', event.target.value)} className="bg-zinc-950 border border-zinc-800 p-3 text-white">
+            <option value="">All brands</option>
+            {brands.map((brand) => <option key={getId(brand)} value={getId(brand)}>{getName(brand)}</option>)}
+          </select>
+          <select value={String(activeFilters.isStack)} onChange={(event) => updateParam('isStack', event.target.value)} className="bg-zinc-950 border border-zinc-800 p-3 text-white">
+            <option value="">All products</option>
+            <option value="true">Stacks only</option>
+            <option value="false">Singles only</option>
+          </select>
+          <select value={filters.sort || '-createdAt'} onChange={(event) => updateParam('sort', event.target.value)} className="bg-zinc-950 border border-zinc-800 p-3 text-white">
+            <option value="-createdAt">Latest</option>
+            <option value="price">Price low to high</option>
+            <option value="-price">Price high to low</option>
+            <option value="name">Name</option>
+          </select>
+          <input value={activeFilters.minPrice} onChange={(event) => updateParam('minPrice', event.target.value)} placeholder="Min price" type="number" className="bg-zinc-950 border border-zinc-800 p-3 text-white" />
+          <input value={activeFilters.maxPrice} onChange={(event) => updateParam('maxPrice', event.target.value)} placeholder="Max price" type="number" className="bg-zinc-950 border border-zinc-800 p-3 text-white" />
         </div>
       </header>
 
+      {error ? <EmptyState title="Could not load products" body={error} /> : null}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {filteredProducts.map((product, index) => (
-          <motion.article
-            key={product.id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.05 }}
-            onClick={() => navigate(`/product/${product.id}`)}
-            className="flex flex-col bg-zinc-950 border border-zinc-800 group hover:border-primary transition-colors duration-300 cursor-pointer"
-          >
-            <div className="relative aspect-[4/5] bg-zinc-900 overflow-hidden">
-              {product.isSale && (
-                <span className="absolute top-4 left-4 bg-primary text-white font-black uppercase text-[10px] px-3 py-1 z-10 tracking-widest rounded-sm">
-                  Sale
-                </span>
-              )}
-              {product.isSoldOut && (
-                <span className="absolute top-4 left-4 bg-zinc-800 text-zinc-400 font-black uppercase text-[10px] px-3 py-1 z-10 tracking-widest rounded-sm">
-                  Sold Out
-                </span>
-              )}
-              <img
-                src={product.image}
-                alt={product.name}
-                className={`w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 ${product.isSoldOut ? 'grayscale' : ''}`}
-              />
-            </div>
-
-            <div className="p-8 flex flex-col gap-4 flex-grow">
-              <h3 className="text-lg font-black text-white uppercase tracking-tight">
-                {product.name}
-              </h3>
-              <div className="flex items-center gap-3 mt-auto">
-                {product.originalPrice ? (
-                  <>
-                    <span className="text-xl font-black text-primary">${product.price}</span>
-                    <span className="text-sm font-bold text-zinc-600 line-through">${product.originalPrice}</span>
-                  </>
-                ) : (
-                  <span className="text-xl font-black text-white">${product.price}</span>
-                )}
-              </div>
-              <button 
-                disabled={product.isSoldOut}
-                className={`w-full font-bold uppercase py-3 px-6 rounded-full transition-all ${
-                  product.isSoldOut 
-                    ? 'bg-zinc-900 text-zinc-600 cursor-not-allowed' 
-                    : 'bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/10'
-                }`}
-              >
-                {product.isSoldOut ? 'Out of Stock' : 'Add to Cart'}
-              </button>
-            </div>
-          </motion.article>
-        ))}
+        {loading ? <LoadingGrid /> : products.length ? products.map((product, index) => <ProductCard key={getId(product)} product={product} index={index} onAdd={handleAdd} />) : <div className="lg:col-span-4"><EmptyState title="No products found" body="Try clearing filters or searching for something else." /></div>}
       </div>
+
+      {pagination.pages > 1 && (
+        <div className="mt-12 flex items-center justify-center gap-3">
+          <button disabled={pagination.page <= 1} onClick={() => updateParam('page', pagination.page - 1)} className="rounded-full border border-zinc-800 px-5 py-2 font-bold uppercase text-white disabled:opacity-40">Prev</button>
+          <span className="text-sm text-zinc-400">Page {pagination.page} of {pagination.pages}</span>
+          <button disabled={pagination.page >= pagination.pages} onClick={() => updateParam('page', pagination.page + 1)} className="rounded-full border border-zinc-800 px-5 py-2 font-bold uppercase text-white disabled:opacity-40">Next</button>
+        </div>
+      )}
     </div>
   );
 }

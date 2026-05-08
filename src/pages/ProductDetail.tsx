@@ -1,166 +1,152 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Star, ShoppingCart, Truck, ChevronDown, Plus, Minus, ArrowRight, PlusCircle } from 'lucide-react';
-import { PRODUCTS } from '../constants';
 import { motion } from 'motion/react';
+import ProductCard from '../components/ProductCard';
+import { EmptyState } from '../components/AsyncState';
+import { formatPrice, getName, isSoldOut, productId, productImage, productPrice, productSlug } from '../lib/format';
+import { useToast } from '../lib/toast';
+import { reviewsService } from '../services/reviews.service';
+import { useAuthStore } from '../stores/auth.store';
+import { useCartStore } from '../stores/cart.store';
+import { useCatalogStore } from '../stores/catalog.store';
 
 export default function ProductDetail() {
-  const { id } = useParams();
+  const { slug = '' } = useParams();
   const navigate = useNavigate();
-  const product = PRODUCTS.find(p => p.id === id);
+  const { notify } = useToast();
+  const { isAuthenticated } = useAuthStore();
+  const { addItem, loading: cartLoading } = useCartStore();
+  const { productDetails, products, reviews, loading, error, fetchProductBySlug, fetchProductReviews, fetchProducts } = useCatalogStore();
+  const product = productDetails[slug];
   const [quantity, setQuantity] = useState(1);
-  const [selectedFlavor, setSelectedFlavor] = useState(product?.flavors?.[0] || '');
-  const [selectedServing, setSelectedServing] = useState(product?.servings?.[0] || 0);
+  const [selectedFlavor, setSelectedFlavor] = useState('');
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
-  if (!product) return <div className="text-center py-24">Product not found</div>;
+  useEffect(() => {
+    fetchProductBySlug(slug).then((loaded) => {
+      if (loaded) {
+        setSelectedFlavor(loaded.flavors?.[0] || '');
+        const id = productId(loaded);
+        if (id) fetchProductReviews(id);
+      }
+    });
+    fetchProducts({ page: 1, limit: 4 });
+  }, [fetchProductBySlug, fetchProductReviews, fetchProducts, slug]);
+
+  const handleAddToCart = async () => {
+    if (!product) return;
+    if (!isAuthenticated) {
+      notify('Please log in before adding items to your cart.', 'error');
+      navigate('/login', { state: { from: `/product/${slug}` } });
+      return;
+    }
+    if (product.flavors?.length && !selectedFlavor) {
+      notify('Please choose a flavor first.', 'error');
+      return;
+    }
+    await addItem(productId(product), quantity, selectedFlavor || undefined);
+    notify('Added to cart.', 'success');
+  };
+
+  const submitReview = async () => {
+    if (!product) return;
+    if (!isAuthenticated) {
+      notify('Please log in to review this product.', 'error');
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      await reviewsService.create(productId(product), { rating: reviewRating, comment: reviewComment || undefined });
+      await fetchProductReviews(productId(product));
+      setReviewComment('');
+      notify('Review submitted.', 'success');
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'Could not submit review.', 'error');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  if (loading && !product) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><EmptyState title="Loading product..." /></div>;
+  if (!product) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><EmptyState title="Product not found" body={error || 'This product is not available.'} /></div>;
+
+  const images = product.images?.length ? product.images : [productImage(product)];
+  const soldOut = isSoldOut(product);
 
   return (
     <main className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-24">
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start mb-32">
-        {/* Left: Product Image Gallery */}
-        <div className="flex flex-col gap-6 sticky top-32">
+        <div className="flex flex-col gap-6 lg:sticky lg:top-32">
           <div className="w-full aspect-square bg-zinc-900 rounded-sm flex items-center justify-center overflow-hidden border border-zinc-800">
-            <motion.img
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              src={product.image}
-              alt={product.name}
-              className="w-full h-full object-contain p-8"
-            />
+            <motion.img initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} src={images[0]} onError={(event) => { event.currentTarget.src = productImage(null); }} alt={product.name || 'Product'} className="w-full h-full object-contain p-8" />
           </div>
           <div className="flex gap-4 overflow-x-auto hide-scrollbar">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="w-24 h-24 flex-shrink-0 bg-zinc-900 border border-zinc-800 hover:border-primary cursor-pointer transition-all opacity-70 hover:opacity-100 overflow-hidden">
-                <img src={product.image} className="w-full h-full object-contain p-2" alt="Thumbnail" />
+            {images.map((image) => (
+              <div key={image} className="w-24 h-24 flex-shrink-0 bg-zinc-900 border border-zinc-800 overflow-hidden">
+                <img src={image} onError={(event) => { event.currentTarget.src = productImage(null); }} className="w-full h-full object-contain p-2" alt="Thumbnail" />
               </div>
             ))}
           </div>
         </div>
 
-        {/* Right: Product Details */}
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-4 border-b border-zinc-800 pb-8">
             <div className="flex flex-wrap items-center gap-4 mb-2">
-              {product.isBestSeller && (
-                <span className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-sm uppercase tracking-widest">
-                  Best Seller
-                </span>
-              )}
+              {product.isBestSeller || product.isFeatured ? <span className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-sm uppercase tracking-widest">Featured</span> : null}
               <div className="flex items-center text-primary">
-                {[1, 2, 3, 4].map((i) => <Star key={i} size={16} fill="currentColor" />)}
-                <Star size={16} className="text-zinc-700" />
-                <span className="ml-3 text-zinc-400 text-sm font-medium">(428 Reviews)</span>
+                {[1, 2, 3, 4, 5].map((i) => <Star key={i} size={16} fill={i <= Math.round(product.averageRating || 0) ? 'currentColor' : 'none'} />)}
+                <span className="ml-3 text-zinc-400 text-sm font-medium">({reviews.length || product.reviewCount || 0} Reviews)</span>
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">
-              {product.name}
-            </h1>
-            <p className="text-3xl font-black text-primary">${product.price}</p>
-            <p className="text-zinc-300 text-lg leading-relaxed max-w-lg">
-              {product.description}
-            </p>
+            <p className="text-sm font-bold uppercase tracking-widest text-zinc-500">{getName(product.brand)} {getName(product.category) ? `/ ${getName(product.category)}` : ''}</p>
+            <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">{product.name}</h1>
+            <p className="text-3xl font-black text-primary">{formatPrice(productPrice(product))}</p>
+            <p className="text-zinc-300 text-lg leading-relaxed max-w-lg">{product.description || product.shortDescription || 'Product details coming soon.'}</p>
+            {typeof product.stock === 'number' ? <p className="text-sm font-bold uppercase text-zinc-500">Stock: {product.stock}</p> : null}
           </div>
 
-          {/* Selections */}
-          {product.flavors && (
+          {product.flavors?.length ? (
             <div className="flex flex-col gap-4">
               <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">Select Flavor</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {product.flavors.map((flavor) => (
-                  <button
-                    key={flavor}
-                    onClick={() => setSelectedFlavor(flavor)}
-                    className={`py-3 px-4 text-xs font-bold uppercase rounded-sm border-2 transition-all truncate ${
-                      selectedFlavor === flavor
-                        ? 'bg-zinc-900 border-primary text-white'
-                        : 'bg-transparent border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300'
-                    }`}
-                  >
+                  <button key={flavor} onClick={() => setSelectedFlavor(flavor)} className={`py-3 px-4 text-xs font-bold uppercase rounded-sm border-2 transition-all truncate ${selectedFlavor === flavor ? 'bg-zinc-900 border-primary text-white' : 'bg-transparent border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300'}`}>
                     {flavor}
                   </button>
                 ))}
               </div>
             </div>
-          )}
+          ) : null}
 
-          {product.servings && (
-            <div className="flex flex-col gap-4">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">Servings</h3>
-              <div className="flex gap-4">
-                {product.servings.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setSelectedServing(s)}
-                    className={`py-2 px-8 font-bold uppercase rounded-sm border-2 transition-all ${
-                      selectedServing === s
-                        ? 'bg-zinc-900 border-primary text-white'
-                        : 'bg-transparent border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300'
-                    }`}
-                  >
-                    {s} SVGS
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Action Row */}
           <div className="bg-zinc-900/50 p-8 rounded-sm border border-zinc-800 mt-4">
             <div className="flex flex-wrap items-center gap-6">
               <div className="flex items-center bg-black border border-zinc-800 rounded-full h-14 w-32 px-2">
-                <button 
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="flex-1 text-white hover:text-primary transition-colors flex justify-center"
-                >
-                  <Minus size={16} />
-                </button>
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="flex-1 text-white hover:text-primary transition-colors flex justify-center"><Minus size={16} /></button>
                 <span className="flex-1 text-center font-bold">{quantity}</span>
-                <button 
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="flex-1 text-white hover:text-primary transition-colors flex justify-center"
-                >
-                  <Plus size={16} />
-                </button>
+                <button onClick={() => setQuantity(quantity + 1)} className="flex-1 text-white hover:text-primary transition-colors flex justify-center"><Plus size={16} /></button>
               </div>
-              <button
-                disabled={product.isSoldOut}
-                onClick={() => navigate('/checkout')}
-                className="flex-1 min-w-[200px] bg-primary hover:bg-primary-hover text-white font-black uppercase tracking-widest h-14 rounded-full transition-all flex items-center justify-center gap-3 shadow-lg shadow-primary/20 disabled:grayscale disabled:cursor-not-allowed"
-              >
+              <button disabled={soldOut || cartLoading} onClick={handleAddToCart} className="flex-1 min-w-[200px] bg-primary hover:bg-primary-hover text-white font-black uppercase tracking-widest h-14 rounded-full transition-all flex items-center justify-center gap-3 shadow-lg shadow-primary/20 disabled:grayscale disabled:cursor-not-allowed">
                 <ShoppingCart size={20} />
-                Add to Cart
+                {soldOut ? 'Out of Stock' : cartLoading ? 'Adding...' : 'Add to Cart'}
               </button>
             </div>
-            <div className="flex items-center justify-center gap-2 mt-6 text-emerald-500 text-sm font-medium">
-              <Truck size={16} />
-              Free shipping on orders over $75
-            </div>
+            <div className="flex items-center justify-center gap-2 mt-6 text-emerald-500 text-sm font-medium"><Truck size={16} />Free shipping may apply at checkout</div>
           </div>
 
-          {/* Details Accordion */}
           <div className="border-t border-zinc-800 mt-12">
             <details className="group border-b border-zinc-800" open>
-              <summary className="flex justify-between items-center font-black uppercase py-6 cursor-pointer list-none hover:text-primary transition-colors">
-                Nutritional Facts
-                <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
-              </summary>
+              <summary className="flex justify-between items-center font-black uppercase py-6 cursor-pointer list-none hover:text-primary transition-colors">Nutritional Facts<ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" /></summary>
               <div className="pb-8">
                 <div className="bg-zinc-900 p-8 border border-zinc-800">
-                  <h4 className="text-2xl font-black text-white border-b-4 border-black pb-4 mb-6">Supplement Facts</h4>
-                  <div className="text-sm font-bold text-zinc-400 mb-6 font-mono">
-                    Serving Size: 1 Scoop (15g)<br />
-                    Servings Per Container: 30
-                  </div>
-                  <div className="space-y-4">
-                    {product.ingredients?.map((ing) => (
-                      <div key={ing.name} className="flex justify-between border-b border-zinc-800 pb-2">
-                        <span className="font-bold text-zinc-100 uppercase text-sm tracking-tight">{ing.name}</span>
-                        <span className="font-mono text-zinc-300">{ing.amount}</span>
-                      </div>
-                    )) || (
-                      <div className="text-zinc-500 italic">Nutritional information coming soon...</div>
-                    )}
-                  </div>
+                  {product.ingredients?.length ? product.ingredients.map((ing) => (
+                    <div key={`${ing.name}-${ing.amount}`} className="flex justify-between border-b border-zinc-800 pb-2 mb-3">
+                      <span className="font-bold text-zinc-100 uppercase text-sm tracking-tight">{ing.name}</span>
+                      <span className="font-mono text-zinc-300">{ing.amount}</span>
+                    </div>
+                  )) : <div className="text-zinc-500 italic">Nutritional information coming soon.</div>}
                 </div>
               </div>
             </details>
@@ -168,31 +154,36 @@ export default function ProductDetail() {
         </div>
       </section>
 
-      {/* Suggested Stacks */}
-      <section className="mt-40 border-t border-zinc-800 pt-20">
+      <section className="border-t border-zinc-800 pt-16">
+        <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-8">Reviews</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
+            {reviews.length ? reviews.map((review) => (
+              <div key={review._id || review.id} className="border border-zinc-800 bg-zinc-950 p-6">
+                <div className="mb-2 flex text-primary">{[1, 2, 3, 4, 5].map((i) => <Star key={i} size={14} fill={i <= Number(review.rating || 0) ? 'currentColor' : 'none'} />)}</div>
+                <p className="text-zinc-300">{review.comment || 'No comment provided.'}</p>
+              </div>
+            )) : <EmptyState title="No reviews yet" />}
+          </div>
+          <div className="border border-zinc-800 bg-zinc-950 p-6">
+            <h3 className="text-lg font-black uppercase text-white mb-4">Write a Review</h3>
+            <select value={reviewRating} onChange={(event) => setReviewRating(Number(event.target.value))} className="mb-3 w-full border border-zinc-800 bg-zinc-900 p-3 text-white">
+              {[5, 4, 3, 2, 1].map((rating) => <option key={rating} value={rating}>{rating} stars</option>)}
+            </select>
+            <textarea value={reviewComment} onChange={(event) => setReviewComment(event.target.value)} placeholder="Your review" className="min-h-28 w-full border border-zinc-800 bg-zinc-900 p-3 text-white" />
+            <button disabled={submittingReview} onClick={submitReview} className="mt-3 w-full rounded-full bg-primary py-3 font-black uppercase text-white disabled:opacity-60">Submit</button>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-32 border-t border-zinc-800 pt-20">
         <div className="flex justify-between items-end mb-12">
-          <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Stack & Destroy</h2>
-          <Link to="/products" className="hidden md:flex items-center gap-2 text-primary hover:text-white font-bold uppercase transition-colors group">
-            View All Stacks <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
+          <h2 className="text-4xl font-black text-white uppercase tracking-tighter">More Fuel</h2>
+          <Link to="/products" className="hidden md:flex items-center gap-2 text-primary hover:text-white font-bold uppercase transition-colors group">View All <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-           {PRODUCTS.filter(p => p.id !== id).slice(0, 3).map((p) => (
-             <div onClick={() => { navigate(`/product/${p.id}`); window.scrollTo(0,0); }} key={p.id} className="bg-zinc-950 group cursor-pointer border border-zinc-800 hover:border-primary transition-all duration-500 overflow-hidden">
-                <div className="aspect-[4/3] bg-zinc-900 overflow-hidden relative">
-                   <img src={p.image} alt={p.name} className="w-full h-full object-contain p-8 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-700 group-hover:scale-110" />
-                   {p.isBestSeller && <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 font-black text-[10px] uppercase tracking-widest">Essential</div>}
-                </div>
-                <div className="p-8">
-                  <h3 className="text-2xl font-black uppercase text-white mb-2">{p.name}</h3>
-                  <p className="text-zinc-400 text-sm mb-6 line-clamp-2">{p.description}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xl font-black text-white">${p.price}</span>
-                    <PlusCircle className="text-zinc-600 group-hover:text-primary transition-colors" />
-                  </div>
-                </div>
-             </div>
-           ))}
+          {products.filter((item) => productSlug(item) !== slug).slice(0, 3).map((item, index) => <ProductCard key={productId(item)} product={item} index={index} />)}
+          {!products.length && <div className="md:col-span-3"><EmptyState title="No related products" /></div>}
         </div>
       </section>
     </main>

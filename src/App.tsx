@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import Navbar from './components/Navbar';
@@ -20,8 +20,26 @@ import Contact from './pages/Contact';
 import Shipping from './pages/Shipping';
 import Legal from './pages/Legal';
 import Affiliate from './pages/Affiliate';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Account from './pages/Account';
+import Cart from './pages/Cart';
+import Payment from './pages/Payment';
+import ProtectedRoute from './components/ProtectedRoute';
+import { useAuthStore } from './stores/auth.store';
+import { useCartStore } from './stores/cart.store';
 
 export default function App() {
+  const { token, fetchMe, logout } = useAuthStore();
+  const fetchCart = useCartStore((state) => state.fetchCart);
+
+  useEffect(() => {
+    if (!token) return;
+    fetchMe()
+      .then(() => fetchCart().catch(() => undefined))
+      .catch(() => logout());
+  }, [fetchCart, fetchMe, logout, token]);
+
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
@@ -32,10 +50,15 @@ export default function App() {
               <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
               <Route path="/products" element={<PageWrapper><Products /></PageWrapper>} />
               <Route path="/stacks" element={<PageWrapper><Stacks /></PageWrapper>} />
-              <Route path="/orders" element={<PageWrapper><Orders /></PageWrapper>} />
-              <Route path="/order/:id" element={<PageWrapper><OrderDetails /></PageWrapper>} />
-              <Route path="/product/:id" element={<PageWrapper><ProductDetail /></PageWrapper>} />
-              <Route path="/checkout" element={<PageWrapper><Checkout /></PageWrapper>} />
+              <Route path="/cart" element={<PageWrapper><ProtectedRoute><Cart /></ProtectedRoute></PageWrapper>} />
+              <Route path="/orders" element={<PageWrapper><ProtectedRoute><Orders /></ProtectedRoute></PageWrapper>} />
+              <Route path="/order/:id" element={<PageWrapper><ProtectedRoute><OrderDetails /></ProtectedRoute></PageWrapper>} />
+              <Route path="/product/:slug" element={<PageWrapper><ProductDetail /></PageWrapper>} />
+              <Route path="/checkout" element={<PageWrapper><ProtectedRoute><Checkout /></ProtectedRoute></PageWrapper>} />
+              <Route path="/payment/:orderId" element={<PageWrapper><ProtectedRoute><Payment /></ProtectedRoute></PageWrapper>} />
+              <Route path="/account" element={<PageWrapper><ProtectedRoute><Account /></ProtectedRoute></PageWrapper>} />
+              <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
+              <Route path="/register" element={<PageWrapper><Register /></PageWrapper>} />
               <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
               <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
               <Route path="/shipping" element={<PageWrapper><Shipping /></PageWrapper>} />

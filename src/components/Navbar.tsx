@@ -1,7 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { cartItems } from '../lib/format';
+import { useAuthStore } from '../stores/auth.store';
+import { useCartStore } from '../stores/cart.store';
 
 const LINKS = [
   { name: 'Products', href: '/products' },
@@ -13,6 +16,9 @@ const LINKS = [
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { isAuthenticated, customer, logout } = useAuthStore();
+  const cart = useCartStore((state) => state.cart);
+  const cartCount = cartItems(cart).reduce((sum, item) => sum + Number(item.quantity || 0), 0);
 
   return (
     <nav className="bg-black border-b border-zinc-900 sticky top-0 z-50">
@@ -50,11 +56,29 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-4 md:gap-6">
-          <Link to="#" className="text-white hover:text-primary transition-all hover:scale-110">
+          <Link
+            to={isAuthenticated ? '/account' : '/login'}
+            title={customer?.fullName || 'Account'}
+            className="text-white hover:text-primary transition-all hover:scale-110"
+          >
             <User className="w-6 h-6" />
           </Link>
-          <Link to="/checkout" className="text-white hover:text-primary transition-all hover:scale-110">
+          {isAuthenticated && (
+            <button
+              onClick={logout}
+              title="Log out"
+              className="text-white hover:text-primary transition-all hover:scale-110"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          )}
+          <Link to="/cart" className="relative text-white hover:text-primary transition-all hover:scale-110">
             <ShoppingCart className="w-6 h-6" />
+            {cartCount > 0 && (
+              <span className="absolute -right-3 -top-3 min-w-5 h-5 rounded-full bg-primary px-1 text-center text-[10px] font-black leading-5 text-white">
+                {cartCount}
+              </span>
+            )}
           </Link>
         </div>
       </div>
@@ -78,6 +102,20 @@ export default function Navbar() {
                   {link.name}
                 </Link>
               ))}
+              <Link
+                to={isAuthenticated ? '/account' : '/login'}
+                onClick={() => setIsMenuOpen(false)}
+                className="text-lg font-bold text-white uppercase tracking-tighter hover:text-primary transition-colors"
+              >
+                {isAuthenticated ? 'Account' : 'Login'}
+              </Link>
+              <Link
+                to="/cart"
+                onClick={() => setIsMenuOpen(false)}
+                className="text-lg font-bold text-white uppercase tracking-tighter hover:text-primary transition-colors"
+              >
+                Cart {cartCount ? `(${cartCount})` : ''}
+              </Link>
             </div>
           </motion.div>
         )}
