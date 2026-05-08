@@ -68,7 +68,7 @@ export default function OrderDetails() {
             <h2 className="text-2xl font-black text-white uppercase mb-10 border-b border-zinc-800 pb-6 tracking-tight">Items</h2>
             <div className="space-y-8">
               {cartItems(order).map((item) => {
-                const product = item.product;
+                const product = item;
                 return (
                   <div key={item._id || item.id || item.productId} className="flex gap-6 group">
                     <div className="w-24 h-24 bg-black border border-zinc-900 shrink-0 overflow-hidden">
