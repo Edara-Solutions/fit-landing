@@ -86,6 +86,7 @@ export interface CartItem {
   quantity?: number;
   selectedFlavor?: string;
   price?: number;
+  name?: string;
 }
 
 export interface Cart {
