@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cartItems } from '../lib/format';
 import { useAuthStore } from '../stores/auth.store';
 import { useCartStore } from '../stores/cart.store';
+import logo from '../assets/images/fox-logo.png';
 
 const LINKS = [
   { name: 'Products', href: '/products' },
@@ -31,8 +32,9 @@ export default function Navbar() {
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
           
-          <Link to="/" className="text-3xl md:text-4xl font-black text-white italic tracking-tighter">
-            FOX
+          <Link to="/" className="text-3xl md:text-4xl font-black text-white italic tracking-tighter flex items-center">
+            <img src={logo} alt="FOX" className="h-12 md:h-16" />
+            <span className="mx-2">FOX</span>
           </Link>
         </div>
 
