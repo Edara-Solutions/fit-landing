@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { Minus, Plus, ShoppingCart } from 'lucide-react';
+import { ChevronDown, Minus, Plus, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 import { formatPrice, isSoldOut, productId, productImage, productOriginalPrice, productPrice, productSlug } from '../lib/format';
 import { Product } from '../types';
@@ -34,7 +34,7 @@ export default function ProductCard({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.04 }}
       onClick={() => navigate(`/product/${productSlug(product)}`)}
-      className="flex cursor-pointer flex-col bg-zinc-950 border border-zinc-800 group hover:border-primary transition-colors duration-300"
+      className="flex cursor-pointer flex-col bg-zinc-950 border border-zinc-800 group hover:border-primary transition-colors duration-300 rounded-lg overflow-hidden"
     >
       <div className="relative aspect-[4/5] bg-zinc-900 overflow-hidden">
         {(product.discountPrice || product.isSale) && (
@@ -61,43 +61,61 @@ export default function ProductCard({
         </h3>
         <div className="flex items-center gap-3 mt-auto">
           <span className="text-xl font-black text-primary">{formatPrice(productPrice(product))}</span>
-          {originalPrice ? <span className="text-sm font-bold text-zinc-600 line-through">{formatPrice(originalPrice)}</span> : null}
+          {originalPrice ? <span className="text-sm font-bold text-zinc-600 line-through" style={{ fontSize: '12px' }}>{formatPrice(originalPrice)}</span> : null}
         </div>
 
         {onAdd && !soldOut ? (
-          <div className="space-y-3" onClick={(event) => event.stopPropagation()}>
+          <div className="space-y-4" onClick={(event) => event.stopPropagation()}>
             {product.flavors?.length ? (
-              <select
-                value={selectedFlavor}
-                onChange={(event) => setSelectedFlavor(event.target.value)}
-                className="w-full border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-bold uppercase text-white outline-none focus:border-primary"
-              >
-                {product.flavors.map((flavor) => (
-                  <option key={flavor} value={flavor}>
-                    {flavor}
-                  </option>
-                ))}
-              </select>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Flavor</span>
+                </div>
+                <div className="relative">
+                  <select
+                    value={selectedFlavor}
+                    onChange={(event) => setSelectedFlavor(event.target.value)}
+                    className="h-11 w-full appearance-none rounded-full border border-zinc-800 bg-black px-4 pr-10 text-xs font-black uppercase tracking-widest text-white outline-none transition-all hover:border-zinc-600 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  >
+                    {product.flavors.map((flavor) => (
+                      <option
+                        key={flavor}
+                        value={flavor}
+                        className="bg-zinc-950 text-white"
+                      >
+                        {flavor}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
+                </div>
+              </div>
             ) : null}
 
-            <div className="flex h-11 items-center rounded-full border border-zinc-800 bg-black px-2">
-              <button
-                type="button"
-                onClick={() => setQuantity((current) => Math.max(1, current - 1))}
-                className="flex flex-1 justify-center text-white transition-colors hover:text-primary"
-                aria-label="Decrease quantity"
-              >
-                <Minus size={14} />
-              </button>
-              <span className="flex-1 text-center text-sm font-black text-white">{quantity}</span>
-              <button
-                type="button"
-                onClick={() => setQuantity((current) => current + 1)}
-                className="flex flex-1 justify-center text-white transition-colors hover:text-primary"
-                aria-label="Increase quantity"
-              >
-                <Plus size={14} />
-              </button>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Qty</span>
+              <div className="grid h-10 w-32 grid-cols-3 overflow-hidden rounded-full border border-zinc-800 bg-black">
+                <button
+                  type="button"
+                  disabled={quantity <= 1}
+                  onClick={() => setQuantity((current) => Math.max(1, current - 1))}
+                  className="flex items-center justify-center text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-primary disabled:cursor-not-allowed disabled:text-zinc-700 disabled:hover:bg-transparent"
+                  aria-label="Decrease quantity"
+                >
+                  <Minus size={14} />
+                </button>
+                <span className="flex items-center justify-center border-x border-zinc-800 text-sm font-black text-white">
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity((current) => current + 1)}
+                  className="flex items-center justify-center text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-primary"
+                  aria-label="Increase quantity"
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
             </div>
           </div>
         ) : null}

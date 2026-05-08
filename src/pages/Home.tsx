@@ -82,7 +82,7 @@ export default function Home() {
             <h2 className="text-2xl font-black uppercase text-white mb-4">Categories</h2>
             <div className="flex flex-wrap gap-3">
               {categories.slice(0, 8).map((category) => (
-                <button key={getId(category)} onClick={() => navigate(`/products?category=${getId(category)}`)} className="border border-zinc-800 bg-zinc-950 px-5 py-3 text-sm font-black uppercase text-zinc-200 hover:border-primary hover:text-primary">
+                <button key={getId(category)} onClick={() => navigate(`/products?category=${getId(category)}`)} className="cursor-pointer border border-zinc-800 rounded-lg bg-zinc-950 px-5 py-3 text-sm font-black uppercase text-zinc-200 hover:border-primary hover:text-primary transition-colors duration-400">
                   {getName(category)}
                 </button>
               ))}
@@ -93,7 +93,7 @@ export default function Home() {
             <h2 className="text-2xl font-black uppercase text-white mb-4">Brands</h2>
             <div className="flex flex-wrap gap-3">
               {brands.slice(0, 8).map((brand) => (
-                <button key={getId(brand)} onClick={() => navigate(`/products?brand=${getId(brand)}`)} className="border border-zinc-800 bg-zinc-950 px-5 py-3 text-sm font-black uppercase text-zinc-200 hover:border-primary hover:text-primary">
+                <button key={getId(brand)} onClick={() => navigate(`/products?brand=${getId(brand)}`)} className="cursor-pointer border border-zinc-800 rounded-lg bg-zinc-950 px-5 py-3 text-sm font-black uppercase text-zinc-200 hover:border-primary hover:text-primary transition-colors duration-400">
                   {getName(brand)}
                 </button>
               ))}
