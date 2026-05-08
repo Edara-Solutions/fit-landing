@@ -2,13 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { EmptyState, LoadingGrid } from '../components/AsyncState';
-import ProductCard from '../components/ProductCard';
+import ProductCard, { AddProductPayload } from '../components/ProductCard';
 import { getId, getName } from '../lib/format';
 import { useToast } from '../lib/toast';
 import { useAuthStore } from '../stores/auth.store';
 import { useCartStore } from '../stores/cart.store';
 import { useCatalogStore } from '../stores/catalog.store';
-import { Product } from '../types';
 
 export default function Products() {
   const [params, setParams] = useSearchParams();
@@ -47,19 +46,21 @@ export default function Products() {
     setParams(next);
   };
 
-  const handleAdd = async (product: Product) => {
+  const handleAdd = async ({ product, quantity, selectedFlavor }: AddProductPayload) => {
     if (!isAuthenticated) {
       notify('Please log in to add items to your cart.', 'error');
       return;
     }
-    const productId = getId(product);
-    const selectedFlavor = product.flavors?.length === 1 ? product.flavors[0] : undefined;
-    if (product.flavors && product.flavors.length > 1) {
-      notify('Choose a flavor on the product page first.', 'info');
+    if (product.flavors?.length && !selectedFlavor) {
+      notify('Please choose a flavor first.', 'error');
       return;
     }
-    await addItem(productId, 1, selectedFlavor);
-    notify('Added to cart.', 'success');
+    try {
+      await addItem(getId(product), quantity, selectedFlavor);
+      notify('Added to cart.', 'success');
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'Could not add item to cart.', 'error');
+    }
   };
 
   return (

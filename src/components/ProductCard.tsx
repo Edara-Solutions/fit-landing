@@ -1,8 +1,15 @@
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart } from 'lucide-react';
+import { Minus, Plus, ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
 import { formatPrice, isSoldOut, productId, productImage, productOriginalPrice, productPrice, productSlug } from '../lib/format';
 import { Product } from '../types';
+
+export interface AddProductPayload {
+  product: Product;
+  quantity: number;
+  selectedFlavor?: string;
+}
 
 export default function ProductCard({
   product,
@@ -12,11 +19,13 @@ export default function ProductCard({
   key?: string;
   product: Product;
   index?: number;
-  onAdd?: (product: Product) => void | Promise<void>;
+  onAdd?: (payload: AddProductPayload) => void | Promise<void>;
 }) {
   const navigate = useNavigate();
   const soldOut = isSoldOut(product);
   const originalPrice = productOriginalPrice(product);
+  const [quantity, setQuantity] = useState(1);
+  const [selectedFlavor, setSelectedFlavor] = useState(product.flavors?.[0] || '');
 
   return (
     <motion.article
@@ -54,11 +63,50 @@ export default function ProductCard({
           <span className="text-xl font-black text-primary">{formatPrice(productPrice(product))}</span>
           {originalPrice ? <span className="text-sm font-bold text-zinc-600 line-through">{formatPrice(originalPrice)}</span> : null}
         </div>
+
+        {onAdd && !soldOut ? (
+          <div className="space-y-3" onClick={(event) => event.stopPropagation()}>
+            {product.flavors?.length ? (
+              <select
+                value={selectedFlavor}
+                onChange={(event) => setSelectedFlavor(event.target.value)}
+                className="w-full border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-bold uppercase text-white outline-none focus:border-primary"
+              >
+                {product.flavors.map((flavor) => (
+                  <option key={flavor} value={flavor}>
+                    {flavor}
+                  </option>
+                ))}
+              </select>
+            ) : null}
+
+            <div className="flex h-11 items-center rounded-full border border-zinc-800 bg-black px-2">
+              <button
+                type="button"
+                onClick={() => setQuantity((current) => Math.max(1, current - 1))}
+                className="flex flex-1 justify-center text-white transition-colors hover:text-primary"
+                aria-label="Decrease quantity"
+              >
+                <Minus size={14} />
+              </button>
+              <span className="flex-1 text-center text-sm font-black text-white">{quantity}</span>
+              <button
+                type="button"
+                onClick={() => setQuantity((current) => current + 1)}
+                className="flex flex-1 justify-center text-white transition-colors hover:text-primary"
+                aria-label="Increase quantity"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+          </div>
+        ) : null}
+
         <button
           disabled={soldOut}
           onClick={(event) => {
             event.stopPropagation();
-            onAdd?.(product);
+            onAdd?.({ product, quantity, selectedFlavor: selectedFlavor || undefined });
           }}
           className={`w-full font-bold uppercase py-3 px-6 rounded-full transition-all flex items-center justify-center gap-2 ${
             soldOut

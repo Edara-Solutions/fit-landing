@@ -3,19 +3,46 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useEffect } from 'react';
 import { EmptyState, LoadingGrid } from '../components/AsyncState';
-import ProductCard from '../components/ProductCard';
+import ProductCard, { AddProductPayload } from '../components/ProductCard';
 import { getId, getName } from '../lib/format';
+import { useToast } from '../lib/toast';
+import { useAuthStore } from '../stores/auth.store';
+import { useCartStore } from '../stores/cart.store';
 import { useCatalogStore } from '../stores/catalog.store';
 
 export default function Home() {
   const navigate = useNavigate();
+  const { notify } = useToast();
+  const { isAuthenticated } = useAuthStore();
+  const { addItem } = useCartStore();
   const { products, categories, brands, loading, error, fetchProducts, fetchCategories, fetchBrands } = useCatalogStore();
+  const featuredProducts = products.filter((product) => product.isFeatured === true);
 
   useEffect(() => {
     fetchProducts({ page: 1, limit: 4, sort: '-createdAt' });
     fetchCategories();
     fetchBrands();
   }, [fetchBrands, fetchCategories, fetchProducts]);
+
+  const handleAdd = async ({ product, quantity, selectedFlavor }: AddProductPayload) => {
+    if (!isAuthenticated) {
+      notify('Please log in to add items to your cart.', 'error');
+      navigate('/login', { state: { from: '/' } });
+      return;
+    }
+
+    if (product.flavors?.length && !selectedFlavor) {
+      notify('Please choose a flavor first.', 'error');
+      return;
+    }
+
+    try {
+      await addItem(getId(product), quantity, selectedFlavor);
+      notify('Added to cart.', 'success');
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'Could not add item to cart.', 'error');
+    }
+  };
 
   return (
     <div className="flex flex-col">
@@ -38,10 +65,10 @@ export default function Home() {
               Unleash your ultimate potential with scientifically backed, high-octane supplements designed for the relentless.
             </p>
             <div className="flex flex-wrap gap-4">
-              <button onClick={() => navigate('/products')} className="bg-primary text-white font-bold uppercase py-4 px-10 rounded-full hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20">
+              <button onClick={() => navigate('/products')} className="cursor-pointer bg-primary text-white font-bold uppercase py-4 px-10 rounded-full hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20">
                 Shop Now
               </button>
-              <button onClick={() => navigate('/stacks')} className="bg-transparent border-2 border-primary text-white font-bold uppercase py-4 px-10 rounded-full hover:bg-primary/10 transition-colors">
+              <button onClick={() => navigate('/stacks')} className="cursor-pointer bg-transparent border-2 border-primary text-white font-bold uppercase py-4 px-10 rounded-full hover:bg-primary/10 transition-colors">
                 View Stacks
               </button>
             </div>
@@ -86,7 +113,7 @@ export default function Home() {
 
         {error ? <EmptyState title="Could not load products" body={error} /> : null}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {loading ? <LoadingGrid count={4} /> : products.length ? products.map((product, index) => <ProductCard key={getId(product)} product={product} index={index} />) : <div className="md:col-span-4"><EmptyState title="No products yet" /></div>}
+          {loading ? <LoadingGrid count={4} /> : featuredProducts.length ? featuredProducts.map((product, index) => <ProductCard key={getId(product)} product={product} index={index} onAdd={handleAdd} />) : <div className="md:col-span-4"><EmptyState title="No featured products yet" /></div>}
         </div>
       </section>
     </div>
