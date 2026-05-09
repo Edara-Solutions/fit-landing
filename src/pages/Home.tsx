@@ -10,16 +10,29 @@ import { useAuthStore } from '../stores/auth.store';
 import { useCartStore } from '../stores/cart.store';
 import { useCatalogStore } from '../stores/catalog.store';
 
+const HOME_PRODUCT_FILTERS = {
+  category: '',
+  brand: '',
+  flavor: '',
+  isStack: '',
+  isFeatured: true,
+  minPrice: '',
+  maxPrice: '',
+  search: '',
+  page: 1,
+  limit: 4,
+  sort: '-createdAt',
+};
+
 export default function Home() {
   const navigate = useNavigate();
   const { notify } = useToast();
   const { isAuthenticated } = useAuthStore();
   const { addItem } = useCartStore();
   const { products, categories, brands, loading, error, fetchProducts, fetchCategories, fetchBrands } = useCatalogStore();
-  const featuredProducts = products.filter((product) => product.isFeatured === true);
 
   useEffect(() => {
-    fetchProducts({ page: 1, limit: 4, sort: '-createdAt' });
+    fetchProducts(HOME_PRODUCT_FILTERS);
     fetchCategories();
     fetchBrands();
   }, [fetchBrands, fetchCategories, fetchProducts]);
@@ -113,7 +126,7 @@ export default function Home() {
 
         {error ? <EmptyState title="Could not load products" body={error} /> : null}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {loading ? <LoadingGrid count={4} /> : featuredProducts.length ? featuredProducts.map((product, index) => <ProductCard key={getId(product)} product={product} index={index} onAdd={handleAdd} />) : <div className="md:col-span-4"><EmptyState title="No featured products yet" /></div>}
+          {loading ? <LoadingGrid count={4} /> : products.length ? products.map((product, index) => <ProductCard key={getId(product)} product={product} index={index} onAdd={handleAdd} />) : <div className="md:col-span-4"><EmptyState title="No featured products yet" /></div>}
         </div>
       </section>
     </div>
