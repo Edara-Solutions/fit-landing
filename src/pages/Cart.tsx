@@ -32,7 +32,7 @@ export default function Cart() {
           <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">Cart</h1>
           <p className="text-zinc-400 mt-2">Review your stack before checkout.</p>
         </div>
-        {items.length ? <button disabled={loading} onClick={() => run(clearCart, 'Cart cleared.')} className="flex items-center gap-2 rounded-full border border-zinc-700 px-6 py-3 font-black uppercase text-white hover:border-primary hover:text-primary"><Trash2 size={16} />Clear</button> : null}
+        {items.length ? <button disabled={loading} onClick={() => run(clearCart, 'Cart cleared.')} className="cursor-pointer flex items-center gap-2 rounded-full border border-zinc-700 px-6 py-3 font-black uppercase text-white hover:border-primary hover:text-primary"><Trash2 size={16} />Clear</button> : null}
       </div>
 
       {error ? <EmptyState title="Could not load cart" body={error} /> : null}
@@ -73,7 +73,7 @@ export default function Cart() {
                 <span>Subtotal</span>
                 <span className="font-black text-white">{formatPrice(cartSubtotal(cart))}</span>
               </div>
-              <button onClick={() => navigate('/checkout')} disabled={!items.length || loading} className="w-full rounded-full bg-primary py-4 font-black uppercase tracking-widest text-white hover:bg-primary-hover disabled:opacity-50 flex items-center justify-center gap-2">
+              <button onClick={() => navigate('/checkout')} disabled={!items.length || loading} className="cursor-pointer w-full rounded-full bg-primary py-4 font-black uppercase tracking-widest text-white hover:bg-primary-hover disabled:opacity-50 flex items-center justify-center gap-2">
                 <ShoppingBag size={18} /> Checkout
               </button>
             </div>

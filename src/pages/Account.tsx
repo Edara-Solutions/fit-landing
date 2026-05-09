@@ -98,9 +98,9 @@ export default function Account() {
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => edit(item)} className="border border-zinc-700 px-4 py-2 text-xs font-black uppercase text-white">Edit</button>
-                  <button type="button" onClick={() => action(() => setDefaultAddress(getId(item)), 'Default address updated.')} className="border border-zinc-700 px-4 py-2 text-xs font-black uppercase text-white">Default</button>
-                  <button type="button" onClick={() => action(() => deleteAddress(getId(item)), 'Address deleted.')} className="border border-zinc-700 px-4 py-2 text-xs font-black uppercase text-white">Delete</button>
+                  <button type="button" onClick={() => edit(item)} className="rounded-lg cursor-pointer border border-zinc-700 px-4 py-2 text-xs font-black uppercase text-white">Edit</button>
+                  <button type="button" onClick={() => action(() => setDefaultAddress(getId(item)), 'Default address updated.')} className="rounded-lg cursor-pointer border border-zinc-700 px-4 py-2 text-xs font-black uppercase text-white">Default</button>
+                  <button type="button" onClick={() => action(() => deleteAddress(getId(item)), 'Address deleted.')} className="rounded-lg cursor-pointer border border-zinc-700 px-4 py-2 text-xs font-black uppercase text-white">Delete</button>
                 </div>
               </div>
             ))}

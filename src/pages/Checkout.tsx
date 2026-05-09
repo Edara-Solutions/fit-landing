@@ -149,7 +149,7 @@ export default function Checkout() {
 
           <div className="flex gap-3">
             <input value={couponCode} onChange={(event) => setCouponCode(event.target.value.toUpperCase())} placeholder="Discount code" className="flex-1 bg-zinc-900 border border-zinc-800 p-3 uppercase text-xs font-bold tracking-widest" />
-            <button type="button" onClick={applyCoupon} className="bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 uppercase font-bold text-xs transition-colors">Apply</button>
+            <button type="button" onClick={applyCoupon} className="cursor-pointer bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 uppercase font-bold text-xs transition-colors">Apply</button>
           </div>
 
           <div className="space-y-3 pt-6 border-t border-zinc-800">
@@ -163,7 +163,7 @@ export default function Checkout() {
             <span className="text-3xl font-black text-white">{formatPrice(total)}</span>
           </div>
 
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} disabled={loading} className="w-full bg-primary text-white font-black uppercase py-6 rounded-full tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:bg-primary-hover transition-all disabled:opacity-60">
+          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} disabled={loading} className="cursor-pointer w-full bg-primary text-white font-black uppercase py-6 rounded-full tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:bg-primary-hover transition-all disabled:opacity-60">
             <Lock size={18} />
             {loading ? 'Creating...' : 'Create Order'}
           </motion.button>
