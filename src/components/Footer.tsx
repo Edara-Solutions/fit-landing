@@ -13,7 +13,7 @@ export default function Footer() {
     <footer className="bg-zinc-950 border-t-4 border-primary mt-24">
       <div className="max-w-7xl mx-auto py-20 px-8 flex flex-col items-center gap-12">
         <Link to="/" className="text-3xl font-black text-primary tracking-tighter uppercase italic">
-          FOX
+          BE-FOX
         </Link>
         
         <div className="flex flex-wrap justify-center gap-x-8 gap-y-4">
@@ -29,7 +29,7 @@ export default function Footer() {
         </div>
 
         <div className="text-[10px] text-zinc-600 font-light uppercase tracking-[0.2em] text-center">
-          © {new Date().getFullYear()} FOX NUTRITION. BUILT TO PERFORM.
+          © {new Date().getFullYear()} BE-FOX NUTRITION. BUILT TO PERFORM.
         </div>
       </div>
     </footer>

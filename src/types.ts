@@ -50,6 +50,9 @@ export interface Product {
   flavors?: string[];
   servings?: number[];
   ingredients?: { name?: string; amount?: string }[];
+  nutritionFacts?: Record<string, string | number | boolean | null | undefined>;
+  usageInstructions?: string | string[];
+  warnings?: string | string[];
   includedItems?: string[];
   averageRating?: number;
   reviewCount?: number;

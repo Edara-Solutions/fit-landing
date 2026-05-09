@@ -79,7 +79,7 @@ export default function Contact() {
               <div className="bg-zinc-900/50 p-8 border-l-4 border-primary group hover:bg-zinc-900 transition-colors">
                 <Truck className="text-primary w-10 h-10 mb-4" />
                 <h3 className="text-xl font-black uppercase text-white mb-2">Wholesale</h3>
-                <p className="text-sm text-zinc-500 mb-4">Stock FOX in your facility. Aggressive margins available.</p>
+                <p className="text-sm text-zinc-500 mb-4">Stock BE-FOX in your facility. Aggressive margins available.</p>
                 <a href="mailto:wholesale@foxsupps.com" className="text-sm font-black text-primary hover:text-white transition-colors uppercase tracking-widest">wholesale@foxsupps.com</a>
               </div>
             </div>
@@ -91,7 +91,7 @@ export default function Contact() {
                </div>
                <div className="space-y-4">
                   {[
-                    { q: "Are FOX stacks safe for tested athletes?", a: "All CORE series products are strictly third-party tested. Our EXTREME line contains stimulants. Check federation lists." },
+                    { q: "Are BE-FOX stacks safe for tested athletes?", a: "All CORE series products are strictly third-party tested. Our EXTREME line contains stimulants. Check federation lists." },
                     { q: "How fast is shipping?", a: "Domestic orders process within 24 hours. Standard transit is 2-4 business days." },
                     { q: "What is the return policy?", a: "Unopened products can be returned within 30 days. Open tubs are final for safety." }
                   ].map((faq, i) => (

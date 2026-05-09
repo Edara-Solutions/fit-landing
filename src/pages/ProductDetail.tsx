@@ -4,7 +4,7 @@ import { Star, ShoppingCart, Truck, ChevronDown, Plus, Minus, ArrowRight, PlusCi
 import { motion } from 'motion/react';
 import ProductCard from '../components/ProductCard';
 import { EmptyState } from '../components/AsyncState';
-import { formatPrice, getName, isSoldOut, productId, productImage, productPrice, productSlug } from '../lib/format';
+import { formatPrice, getName, isSoldOut, productId, productImage, productOriginalPrice, productPrice, productSlug } from '../lib/format';
 import { useToast } from '../lib/toast';
 import { reviewsService } from '../services/reviews.service';
 import { useAuthStore } from '../stores/auth.store';
@@ -24,11 +24,15 @@ export default function ProductDetail() {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [selectedImage, setSelectedImage] = useState('');
+
+  console.log("product", product);
 
   useEffect(() => {
     fetchProductBySlug(slug).then((loaded) => {
       if (loaded) {
         setSelectedFlavor(loaded.flavors?.[0] || '');
+        setSelectedImage(loaded.images?.[0] || productImage(loaded));
         const id = productId(loaded);
         if (id) fetchProductReviews(id);
       }
@@ -74,20 +78,34 @@ export default function ProductDetail() {
   if (!product) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><EmptyState title="Product not found" body={error || 'This product is not available.'} /></div>;
 
   const images = product.images?.length ? product.images : [productImage(product)];
+  const mainImage = selectedImage || images[0];
   const soldOut = isSoldOut(product);
+  const currentPrice = productPrice(product);
+  const originalPrice = productOriginalPrice(product);
+  const discountPercent = originalPrice && originalPrice > currentPrice
+    ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
+    : 0;
+  const nutritionFacts = product.nutritionFacts ? Object.entries(product.nutritionFacts).filter(([, value]) => value !== null && value !== undefined && value !== '') : [];
+  const usageInstructions = toTextList(product.usageInstructions);
+  const warnings = toTextList(product.warnings);
 
   return (
     <main className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-24">
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start mb-32">
         <div className="flex flex-col gap-6 lg:sticky lg:top-32">
           <div className="w-full aspect-square bg-zinc-900 rounded-sm flex items-center justify-center overflow-hidden border border-zinc-800">
-            <motion.img initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} src={images[0]} onError={(event) => { event.currentTarget.src = productImage(null); }} alt={product.name || 'Product'} className="w-full h-full object-contain p-8" />
+            <motion.img key={mainImage} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} src={mainImage} onError={(event) => { event.currentTarget.src = productImage(null); }} alt={product.name || 'Product'} className="w-full h-full object-contain p-8" />
           </div>
           <div className="flex gap-4 overflow-x-auto hide-scrollbar">
             {images.map((image) => (
-              <div key={image} className="w-24 h-24 flex-shrink-0 bg-zinc-900 border border-zinc-800 overflow-hidden">
+              <button
+                key={image}
+                type="button"
+                onClick={() => setSelectedImage(image)}
+                className={`w-24 h-24 flex-shrink-0 bg-zinc-900 border overflow-hidden transition-all hover:border-primary ${mainImage === image ? 'border-primary ring-2 ring-primary/20' : 'border-zinc-800'}`}
+              >
                 <img src={image} onError={(event) => { event.currentTarget.src = productImage(null); }} className="w-full h-full object-contain p-2" alt="Thumbnail" />
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -103,7 +121,17 @@ export default function ProductDetail() {
             </div>
             <p className="text-sm font-bold uppercase tracking-widest text-zinc-500">{getName(product.brand)} {getName(product.category) ? `/ ${getName(product.category)}` : ''}</p>
             <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">{product.name}</h1>
-            <p className="text-3xl font-black text-primary">{formatPrice(productPrice(product))}</p>
+            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+              <span className="text-4xl font-black text-primary">{formatPrice(currentPrice)}</span>
+              {originalPrice && originalPrice > currentPrice ? (
+                <>
+                  <span className="text-lg font-bold text-zinc-500 line-through">{formatPrice(originalPrice)}</span>
+                  <span className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">
+                    Save {discountPercent}%
+                  </span>
+                </>
+              ) : null}
+            </div>
             <p className="text-zinc-300 text-lg leading-relaxed max-w-lg">{product.description || product.shortDescription || 'Product details coming soon.'}</p>
             {typeof product.stock === 'number' ? <p className="text-sm font-bold uppercase text-zinc-500">Stock: {product.stock}</p> : null}
           </div>
@@ -113,7 +141,7 @@ export default function ProductDetail() {
               <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">Select Flavor</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {product.flavors.map((flavor) => (
-                  <button key={flavor} onClick={() => setSelectedFlavor(flavor)} className={`py-3 px-4 text-xs font-bold uppercase rounded-sm border-2 transition-all truncate ${selectedFlavor === flavor ? 'bg-zinc-900 border-primary text-white' : 'bg-transparent border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300'}`}>
+                  <button key={flavor} onClick={() => setSelectedFlavor(flavor)} className={`cursor-pointer rounded-lg py-3 px-4 text-xs font-bold uppercase rounded-sm border-2 transition-all truncate ${selectedFlavor === flavor ? 'bg-zinc-900 border-primary text-white' : 'bg-transparent border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300'}`}>
                     {flavor}
                   </button>
                 ))}
@@ -124,11 +152,11 @@ export default function ProductDetail() {
           <div className="bg-zinc-900/50 p-8 rounded-sm border border-zinc-800 mt-4">
             <div className="flex flex-wrap items-center gap-6">
               <div className="flex items-center bg-black border border-zinc-800 rounded-full h-14 w-32 px-2">
-                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="flex-1 text-white hover:text-primary transition-colors flex justify-center"><Minus size={16} /></button>
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="cursor-pointer flex-1 text-white hover:text-primary transition-colors flex justify-center"><Minus size={16} /></button>
                 <span className="flex-1 text-center font-bold">{quantity}</span>
-                <button onClick={() => setQuantity(quantity + 1)} className="flex-1 text-white hover:text-primary transition-colors flex justify-center"><Plus size={16} /></button>
+                <button onClick={() => setQuantity(quantity + 1)} className="cursor-pointer flex-1 text-white hover:text-primary transition-colors flex justify-center"><Plus size={16} /></button>
               </div>
-              <button disabled={soldOut || cartLoading} onClick={handleAddToCart} className="flex-1 min-w-[200px] bg-primary hover:bg-primary-hover text-white font-black uppercase tracking-widest h-14 rounded-full transition-all flex items-center justify-center gap-3 shadow-lg shadow-primary/20 disabled:grayscale disabled:cursor-not-allowed">
+              <button disabled={soldOut || cartLoading} onClick={handleAddToCart} className="cursor-pointer flex-1 min-w-[200px] bg-primary hover:bg-primary-hover text-white font-black uppercase tracking-widest h-14 rounded-full transition-all flex items-center justify-center gap-3 shadow-lg shadow-primary/20 disabled:grayscale disabled:cursor-not-allowed">
                 <ShoppingCart size={20} />
                 {soldOut ? 'Out of Stock' : cartLoading ? 'Adding...' : 'Add to Cart'}
               </button>
@@ -141,15 +169,51 @@ export default function ProductDetail() {
               <summary className="flex justify-between items-center font-black uppercase py-6 cursor-pointer list-none hover:text-primary transition-colors">Nutritional Facts<ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" /></summary>
               <div className="pb-8">
                 <div className="bg-zinc-900 p-8 border border-zinc-800">
-                  {product.ingredients?.length ? product.ingredients.map((ing) => (
-                    <div key={`${ing.name}-${ing.amount}`} className="flex justify-between border-b border-zinc-800 pb-2 mb-3">
-                      <span className="font-bold text-zinc-100 uppercase text-sm tracking-tight">{ing.name}</span>
-                      <span className="font-mono text-zinc-300">{ing.amount}</span>
+                  {nutritionFacts.length ? nutritionFacts.map(([key, value]) => (
+                    <div key={key} className="flex justify-between gap-6 border-b border-zinc-800 pb-2 mb-3">
+                      <span className="font-bold text-zinc-100 uppercase text-sm tracking-tight">{key.replace(/([A-Z])/g, ' $1')}</span>
+                      <span className="font-mono text-zinc-300 text-right">{String(value)}</span>
                     </div>
                   )) : <div className="text-zinc-500 italic">Nutritional information coming soon.</div>}
                 </div>
               </div>
             </details>
+
+            {usageInstructions.length ? (
+              <details className="group border-b border-zinc-800">
+                <summary className="flex justify-between items-center font-black uppercase py-6 cursor-pointer list-none hover:text-primary transition-colors">Usage Instructions<ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" /></summary>
+                <div className="pb-8">
+                  <div className="border border-emerald-900/60 bg-emerald-950/20 p-6">
+                    <ol className="space-y-4">
+                      {usageInstructions.map((instruction, index) => (
+                        <li key={`${instruction}-${index}`} className="flex gap-4">
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-xs font-black text-emerald-300">{index + 1}</span>
+                          <span className="text-sm leading-relaxed text-zinc-200">{instruction}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </div>
+              </details>
+            ) : null}
+
+            {warnings.length ? (
+              <details className="group border-b border-zinc-800">
+                <summary className="flex justify-between items-center font-black uppercase py-6 cursor-pointer list-none hover:text-primary transition-colors">Warnings<ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" /></summary>
+                <div className="pb-8">
+                  <div className="border border-primary/50 bg-primary/10 p-6">
+                    <ul className="space-y-4">
+                      {warnings.map((warning, index) => (
+                        <li key={`${warning}-${index}`} className="flex gap-4">
+                          <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                          <span className="text-sm leading-relaxed text-red-100">{warning}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </details>
+            ) : null}
           </div>
         </div>
       </section>
@@ -188,4 +252,13 @@ export default function ProductDetail() {
       </section>
     </main>
   );
+}
+
+function toTextList(value?: string | string[]) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+  return String(value)
+    .split(/\r?\n|\. /)
+    .map((item) => item.trim().replace(/\.$/, ''))
+    .filter(Boolean);
 }

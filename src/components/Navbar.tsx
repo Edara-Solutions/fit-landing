@@ -33,8 +33,8 @@ export default function Navbar() {
           </button>
           
           <Link to="/" className="text-3xl md:text-4xl font-black text-white italic tracking-tighter flex items-center">
-            <img src={logo} alt="FOX" className="h-12 md:h-16" />
-            <span className="mx-2">FOX</span>
+            <img src={logo} alt="BE-FOX" className="h-12 md:h-16" />
+            <span className="mx-2">BE-FOX</span>
           </Link>
         </div>
 
