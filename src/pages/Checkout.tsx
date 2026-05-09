@@ -17,7 +17,7 @@ export default function Checkout() {
   const { notify } = useToast();
   const { customer } = useAuthStore();
   const { cart, fetchCart } = useCartStore();
-  const { discount, freeShipping, paymentMethod, loading, validateCoupon, createOrder, setPaymentMethod } = useCheckoutStore();
+  const { coupon, discount, freeShipping, paymentMethod, loading, validateCoupon, clearCoupon, createOrder, setPaymentMethod } = useCheckoutStore();
   const [addressId, setAddressId] = useState('');
   const [address, setAddress] = useState<Address>(emptyAddress);
   const [couponCode, setCouponCode] = useState('');
@@ -26,6 +26,7 @@ export default function Checkout() {
   const subtotal = cartSubtotal(cart);
   const shippingFee = freeShipping || subtotal <= 0 ? 0 : 50;
   const total = Math.max(0, subtotal + shippingFee - discount);
+  const isCouponVerified = Boolean(couponCode.trim() && coupon);
 
   const addresses = useMemo(() => customer?.addresses || [], [customer?.addresses]);
 
@@ -51,6 +52,11 @@ export default function Checkout() {
     } catch (error) {
       notify(error instanceof Error ? error.message : 'Coupon is not valid.', 'error');
     }
+  };
+
+  const resetCoupon = () => {
+    setCouponCode('');
+    clearCoupon();
   };
 
   const submit = async (event: FormEvent) => {
@@ -120,7 +126,7 @@ export default function Checkout() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {(['vodafone_cash', 'instapay'] as const).map((method) => (
-              <button key={method} type="button" onClick={() => setPaymentMethod(method)} className={`border p-5 text-left uppercase font-black ${paymentMethod === method ? 'border-primary bg-primary/10 text-white' : 'border-zinc-800 bg-zinc-950 text-zinc-400'}`}>
+              <button key={method} type="button" onClick={() => setPaymentMethod(method)} className={`cursor-pointer rounded-lg border p-5 text-left uppercase font-black ${paymentMethod === method ? 'border-primary bg-primary/10 text-white' : 'border-zinc-800 bg-zinc-950 text-zinc-400'}`}>
                 <span className="flex items-center gap-3"><span className={`h-5 w-5 rounded-full border-2 ${paymentMethod === method ? 'border-primary bg-primary' : 'border-zinc-700'}`} />{method.replace('_', ' ')}</span>
               </button>
             ))}
@@ -148,8 +154,18 @@ export default function Checkout() {
           </div>
 
           <div className="flex gap-3">
-            <input value={couponCode} onChange={(event) => setCouponCode(event.target.value.toUpperCase())} placeholder="Discount code" className="flex-1 bg-zinc-900 border border-zinc-800 p-3 uppercase text-xs font-bold tracking-widest" />
-            <button type="button" onClick={applyCoupon} className="cursor-pointer bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 uppercase font-bold text-xs transition-colors">Apply</button>
+            <input
+              value={couponCode}
+              onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
+              placeholder="Discount code"
+              disabled={isCouponVerified}
+              className="flex-1 bg-zinc-900 border border-zinc-800 p-3 uppercase text-xs font-bold tracking-widest disabled:cursor-not-allowed disabled:opacity-60"
+            />
+            {isCouponVerified ? (
+              <button type="button" onClick={resetCoupon} className="cursor-pointer bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 uppercase font-bold text-xs transition-colors">Clear</button>
+            ) : (
+              <button type="button" onClick={applyCoupon} className="cursor-pointer bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 uppercase font-bold text-xs transition-colors">Apply</button>
+            )}
           </div>
 
           <div className="space-y-3 pt-6 border-t border-zinc-800">

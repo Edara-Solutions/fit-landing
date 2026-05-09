@@ -21,6 +21,7 @@ interface CheckoutState {
   setShippingDetails: (address: Address | null) => void;
   setPaymentMethod: (method: 'vodafone_cash' | 'instapay') => void;
   validateCoupon: (code: string, orderTotal: number) => Promise<void>;
+  clearCoupon: () => void;
   createOrder: (payload: CreateOrderPayload) => Promise<Order>;
   fetchMyOrders: () => Promise<void>;
   fetchOrderDetails: (id: string) => Promise<void>;
@@ -58,6 +59,9 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
       set({ error: apiError.message, loading: false });
       throw apiError;
     }
+  },
+  clearCoupon() {
+    set({ coupon: null, discount: 0, freeShipping: false, error: null });
   },
   async createOrder(payload) {
     set({ loading: true, error: null });
