@@ -24,19 +24,10 @@ export default function Navbar() {
   return (
     <nav className="bg-black border-b border-zinc-900 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 md:px-10 h-20 md:h-24 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button 
-            className="md:hidden text-white p-2 hover:text-primary transition-colors"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-          
-          <Link to="/" className="text-3xl md:text-4xl font-black text-white italic tracking-tighter flex items-center">
-            <img src={logo} alt="BE-FOX" className="h-12 md:h-16" />
-            <span className="mx-2">BE-FOX</span>
-          </Link>
-        </div>
+        <Link to="/" className="text-3xl md:text-4xl font-black text-white italic tracking-tighter flex items-center">
+          <img src={logo} alt="BE-FOX" className="h-12 md:h-16" />
+          <span className="mx-2 text-lg md:text-3xl">BE-FOX</span>
+        </Link>
 
         <div className="hidden md:flex items-center gap-8">
           {LINKS.map((link) => {
@@ -57,7 +48,7 @@ export default function Navbar() {
           })}
         </div>
 
-        <div className="flex items-center gap-4 md:gap-6">
+        <div className="hidden md:flex items-center gap-6">
           <Link
             to={isAuthenticated ? '/account' : '/login'}
             title={customer?.fullName || 'Account'}
@@ -69,7 +60,7 @@ export default function Navbar() {
             <button
               onClick={logout}
               title="Log out"
-              className="text-white hover:text-primary transition-all hover:scale-110"
+              className="cursor-pointer text-white hover:text-primary transition-all hover:scale-110"
             >
               <LogOut className="w-5 h-5" />
             </button>
@@ -83,6 +74,15 @@ export default function Navbar() {
             )}
           </Link>
         </div>
+
+        <button 
+          className="md:hidden text-white p-2 hover:text-primary transition-colors cursor-pointer"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={isMenuOpen}
+        >
+          {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
 
       <AnimatePresence>
@@ -107,15 +107,29 @@ export default function Navbar() {
               <Link
                 to={isAuthenticated ? '/account' : '/login'}
                 onClick={() => setIsMenuOpen(false)}
-                className="text-lg font-bold text-white uppercase tracking-tighter hover:text-primary transition-colors"
+                className="flex items-center gap-3 text-lg font-bold text-white uppercase tracking-tighter hover:text-primary transition-colors"
               >
-                {isAuthenticated ? 'Account' : 'Login'}
+                <User className="w-5 h-5" />
+                {isAuthenticated ? 'Profile' : 'Login'}
               </Link>
+              {isAuthenticated && (
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsMenuOpen(false);
+                  }}
+                  className="cursor-pointer flex items-center gap-3 text-left text-lg font-bold text-white uppercase tracking-tighter hover:text-primary transition-colors"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Logout
+                </button>
+              )}
               <Link
                 to="/cart"
                 onClick={() => setIsMenuOpen(false)}
-                className="text-lg font-bold text-white uppercase tracking-tighter hover:text-primary transition-colors"
+                className="flex items-center gap-3 text-lg font-bold text-white uppercase tracking-tighter hover:text-primary transition-colors"
               >
+                <ShoppingCart className="w-5 h-5" />
                 Cart {cartCount ? `(${cartCount})` : ''}
               </Link>
             </div>
