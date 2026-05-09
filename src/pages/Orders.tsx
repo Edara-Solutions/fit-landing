@@ -54,13 +54,13 @@ export default function Orders() {
           <motion.div key={getId(order)} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.06 }} className="group relative bg-black border border-zinc-800 p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-primary transition-all duration-300">
             <div className="flex flex-col gap-4 w-full md:w-auto">
               <div className="flex items-center gap-4">
-                <h3 className="text-xl font-black text-white uppercase">#{order.orderNumber || getId(order).slice(-8)}</h3>
-                <span className={`${BADGE_BASE} ${ORDER_STATUS_STYLES[order.orderStatus || 'pending_payment'] || 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
-                  Order: {statusLabel(order.orderStatus)}
+                <h3 className="text-sm md:text-xl font-black text-white uppercase">#{order.orderNumber || getId(order).slice(-8)}</h3>
+                <span className={`${BADGE_BASE} ${ORDER_STATUS_STYLES[order.orderStatus || 'pending_payment'] || 'bg-zinc-800 text-zinc-300 border border-zinc-700 text-xs md:text-sm'}`}>
+                  {statusLabel(order.orderStatus)}
                 </span>
-                <span className={`${BADGE_BASE} ${PAYMENT_STATUS_STYLES[order.paymentStatus || 'pending'] || 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+                {/* <span className={`${BADGE_BASE} ${PAYMENT_STATUS_STYLES[order.paymentStatus || 'pending'] || 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
                   Payment: {statusLabel(order.paymentStatus)}
-                </span>
+                </span> */}
               </div>
               
               <div className="flex flex-wrap gap-x-12 gap-y-2 text-sm text-zinc-400 font-medium">

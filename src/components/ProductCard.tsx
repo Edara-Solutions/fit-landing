@@ -99,18 +99,18 @@ export default function ProductCard({
                   type="button"
                   disabled={quantity <= 1}
                   onClick={() => setQuantity((current) => Math.max(1, current - 1))}
-                  className="flex items-center justify-center text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-primary disabled:cursor-not-allowed disabled:text-zinc-700 disabled:hover:bg-transparent"
+                  className="cursor-pointer flex items-center justify-center text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-primary disabled:cursor-not-allowed disabled:text-zinc-700 disabled:hover:bg-transparent"
                   aria-label="Decrease quantity"
                 >
                   <Minus size={14} />
                 </button>
-                <span className="flex items-center justify-center border-x border-zinc-800 text-sm font-black text-white">
+                <span className="cursor-not-allowed flex items-center justify-center border-x border-zinc-800 text-sm font-black text-white">
                   {quantity}
                 </span>
                 <button
                   type="button"
                   onClick={() => setQuantity((current) => current + 1)}
-                  className="flex items-center justify-center text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-primary"
+                  className="cursor-pointer flex items-center justify-center text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-primary"
                   aria-label="Increase quantity"
                 >
                   <Plus size={14} />
@@ -129,7 +129,7 @@ export default function ProductCard({
           className={`w-full font-bold uppercase py-3 px-6 rounded-full transition-all flex items-center justify-center gap-2 ${
             soldOut
               ? 'bg-zinc-900 text-zinc-600 cursor-not-allowed'
-              : 'bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/10'
+              : 'bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/10 cursor-pointer'
           }`}
         >
           <ShoppingCart size={16} />

@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Upload } from 'lucide-react';
 import { EmptyState } from '../components/AsyncState';
 import { formatPrice } from '../lib/format';
@@ -8,6 +8,7 @@ import { useCheckoutStore } from '../stores/checkout.store';
 
 export default function Payment() {
   const { orderId = '' } = useParams();
+  const navigate = useNavigate();
   const { notify } = useToast();
   const { paymentInstructions, loading, error, fetchPaymentInstructions, submitPaymentProof } = useCheckoutStore();
   const [form, setForm] = useState<Record<string, string>>({ transactionReference: '', senderPhone: '', senderName: '', paidAmount: '' });
@@ -27,6 +28,7 @@ export default function Payment() {
     try {
       await submitPaymentProof(orderId, data);
       notify('Payment proof submitted.', 'success');
+      navigate(`/order/${orderId}`);
     } catch (error) {
       notify(error instanceof Error ? error.message : 'Could not submit proof.', 'error');
     }
@@ -73,7 +75,7 @@ export default function Payment() {
         <input value={form.senderPhone} onChange={(event) => setForm({ ...form, senderPhone: event.target.value })} placeholder="Sender phone (optional)" className="w-full bg-zinc-900 border border-zinc-800 p-4 text-white" />
         <input value={form.senderName} onChange={(event) => setForm({ ...form, senderName: event.target.value })} placeholder="Sender name (optional)" className="w-full bg-zinc-900 border border-zinc-800 p-4 text-white" />
         <input value={form.paidAmount} onChange={(event) => setForm({ ...form, paidAmount: event.target.value })} type="number" placeholder="Paid amount (optional)" className="w-full bg-zinc-900 border border-zinc-800 p-4 text-white" />
-        <button disabled={loading} className="w-full rounded-full bg-primary py-4 font-black uppercase text-white disabled:opacity-60 flex items-center justify-center gap-2"><Upload size={18} />Submit Proof</button>
+        <button disabled={loading} className="cursor-pointer w-full rounded-full bg-primary py-4 font-black uppercase text-white disabled:opacity-60 flex items-center justify-center gap-2"><Upload size={18} />Submit Proof</button>
       </form>
     </div>
   );

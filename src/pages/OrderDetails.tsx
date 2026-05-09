@@ -1,16 +1,41 @@
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, CreditCard, XCircle, Upload, CheckCircle, Loader } from 'lucide-react';
-import { useEffect } from 'react';
+import { ArrowLeft, MapPin, CreditCard, XCircle, Upload, CheckCircle, Loader, Image as ImageIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { EmptyState } from '../components/AsyncState';
 import { cartItems, formatPrice, getId, productImage, productPrice, productSlug } from '../lib/format';
 import { useToast } from '../lib/toast';
 import { useCheckoutStore } from '../stores/checkout.store';
+import { Product } from '../types';
+
+const ORDER_STATUS_STYLES: Record<string, string> = {
+  pending_payment: 'bg-amber-950 text-amber-200 border-amber-700/60',
+  payment_submitted: 'bg-sky-950 text-sky-200 border-sky-700/60',
+  confirmed: 'bg-emerald-950 text-emerald-200 border-emerald-700/60',
+  processing: 'bg-indigo-950 text-indigo-200 border-indigo-700/60',
+  shipped: 'bg-blue-950 text-blue-200 border-blue-700/60',
+  delivered: 'bg-green-950 text-green-200 border-green-700/60',
+  cancelled: 'bg-zinc-900 text-zinc-300 border-zinc-700',
+  refunded: 'bg-purple-950 text-purple-200 border-purple-700/60',
+  payment_rejected: 'bg-red-950 text-red-200 border-red-700/60',
+};
+
+const PAYMENT_STATUS_STYLES: Record<string, string> = {
+  pending: 'bg-amber-950 text-amber-200 border-amber-700/60',
+  awaiting_review: 'bg-sky-950 text-sky-200 border-sky-700/60',
+  paid: 'bg-emerald-950 text-emerald-200 border-emerald-700/60',
+  rejected: 'bg-red-950 text-red-200 border-red-700/60',
+  failed: 'bg-rose-950 text-rose-200 border-rose-700/60',
+  refunded: 'bg-purple-950 text-purple-200 border-purple-700/60',
+};
+
+const BADGE_BASE = 'inline-flex items-center rounded-full border px-4 py-2 text-xs font-black uppercase tracking-widest';
 
 export default function OrderDetails() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const { notify } = useToast();
   const { currentOrder: order, loading, error, fetchOrderDetails, cancelOrder } = useCheckoutStore();
+  const [isProofOpen, setIsProofOpen] = useState(false);
 
   useEffect(() => {
     fetchOrderDetails(id);
@@ -39,48 +64,71 @@ export default function OrderDetails() {
         <span className="font-bold uppercase tracking-widest text-sm">Back to Orders</span>
       </Link>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-zinc-800 pb-12 mb-16">
-        <div>
-          <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter mb-4">Order #{order.orderNumber || getId(order).slice(-8)}</h1>
-          <p className="text-lg text-zinc-400">Placed on {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
+      <div className="mb-16 overflow-hidden border border-zinc-800 bg-zinc-950">
+        <div className="flex flex-col gap-8 p-8 md:p-10 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <p className="mb-3 text-xs font-black uppercase tracking-[0.25em] text-primary">Order Details</p>
+          <h1 className="break-words text-4xl md:text-3xl font-black text-white uppercase tracking-tighter mb-4">Order #{order.orderNumber || getId(order).slice(-8)}</h1>
+          <p className="text-base text-zinc-400">Placed on {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <StatusBadge label="Order" status={order.orderStatus || 'pending_payment'} styles={ORDER_STATUS_STYLES} />
+            <StatusBadge label="Payment" status={order.paymentStatus || 'pending'} styles={PAYMENT_STATUS_STYLES} />
+          </div>
         </div>
-        <div className="flex flex-wrap gap-3">
-          {order.orderStatus === 'pending_payment' ? <button onClick={cancel} className="bg-zinc-900 text-white font-black uppercase py-4 px-8 rounded-full border border-zinc-700 hover:border-primary hover:text-primary transition-all flex items-center gap-2 cursor-pointer"><XCircle size={18} />Cancel</button> : null}
-          {order.orderStatus === 'pending_payment' ? <button onClick={() => navigate(`/payment/${getId(order)}`)} className="bg-primary text-white font-black uppercase py-4 px-8 rounded-full hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all flex items-center gap-2 cursor-pointer"><Upload size={18} />Payment</button> : null}
-          {order.paymentStatus === 'awaiting_review' ? <div className="flex items-center gap-2 bg-zinc-900 text-white font-black uppercase py-4 px-8 rounded-full border border-zinc-700 cursor-not-allowed"><Loader size={18} />Processing</div> : null}
-          {order.orderStatus === 'cancelled' ? <div className="flex items-center gap-2 bg-zinc-900 text-white font-black uppercase py-4 px-8 rounded-full border border-zinc-700 cursor-not-allowed"><XCircle size={18} />Canceled</div> : null}
-          {order.paymentStatus === 'paid' ? <div className="flex items-center gap-2 bg-zinc-900 text-white font-black uppercase py-4 px-8 rounded-full border border-zinc-700 cursor-not-allowed"><CheckCircle size={18} />Paid</div> : null}
-          {proofImage ? <img src={proofImage} alt="Proof" className="w-20 h-20 object-cover" /> : null}
+
+        <div className="flex w-full flex-col gap-4 lg:w-auto lg:min-w-80">
+          <div className="flex flex-wrap justify-start gap-3 lg:justify-end">
+            {order.orderStatus === 'pending_payment' ? <button onClick={cancel} className="bg-zinc-900 text-white font-black uppercase py-3 px-6 rounded-full border border-zinc-700 hover:border-primary hover:text-primary transition-all flex items-center gap-2 cursor-pointer"><XCircle size={18} />Cancel</button> : null}
+            {order.paymentStatus === 'pending' || order.paymentStatus === 'rejected' ? <button onClick={() => navigate(`/payment/${getId(order)}`)} className="bg-primary text-white font-black uppercase py-3 px-6 rounded-full hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all flex items-center gap-2 cursor-pointer"><Upload size={18} />Upload Receipt</button> : null}
+            {/* {order.paymentStatus === 'awaiting_review' ? <div className="flex items-center gap-2 rounded-full border border-sky-700/60 bg-sky-950 px-4 py-2 font-black uppercase text-sky-200"><Loader size={12} />Processing</div> : null}
+            {order.orderStatus === 'cancelled' ? <div className="flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900 px-4 py-2 font-black uppercase text-zinc-300"><XCircle size={12} />Canceled</div> : null}
+            {order.paymentStatus === 'paid' ? <div className="flex items-center gap-2 rounded-full border border-emerald-700/60 bg-emerald-950 px-4 py-2 font-black uppercase text-emerald-200"><CheckCircle size={12} />Paid</div> : null} */}
+          </div>
+
+          {proofImage ? (
+            <button
+              type="button"
+              onClick={() => setIsProofOpen(true)}
+              className="cursor-pointer group flex items-center gap-4 rounded-xl border border-zinc-800 bg-black p-3 text-left transition-all hover:border-primary"
+            >
+              <img src={proofImage} alt="Payment proof thumbnail" className="h-20 w-20 shrink-0 rounded-lg border border-zinc-800 object-cover" />
+              <span className="min-w-0">
+                <span className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white"><ImageIcon size={15} className="text-primary" />Payment Proof</span>
+                <span className="mt-1 block text-xs text-zinc-500 group-hover:text-zinc-300">Click to preview receipt</span>
+              </span>
+            </button>
+          ) : null}
+        </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-8 space-y-12">
-          <section className="bg-zinc-950 p-10 border border-zinc-800">
+          {/* <section className="bg-zinc-950 p-10 border border-zinc-800">
             <h2 className="text-2xl font-black text-white uppercase mb-6 tracking-tight">Status</h2>
             <div className="flex flex-wrap gap-3">
-              <span className="bg-zinc-900 border border-zinc-800 px-4 py-2 text-xs font-black uppercase tracking-widest text-white">{order.orderStatus}</span>
-              <span className="bg-zinc-900 border border-zinc-800 px-4 py-2 text-xs font-black uppercase tracking-widest text-white">{order.paymentStatus}</span>
+              <StatusBadge label="Order" status={order.orderStatus || 'pending_payment'} styles={ORDER_STATUS_STYLES} />
+              <StatusBadge label="Payment" status={order.paymentStatus || 'pending'} styles={PAYMENT_STATUS_STYLES} />
             </div>
-          </section>
+          </section> */}
 
-          <section className="bg-zinc-950 p-10 border border-zinc-800">
-            <h2 className="text-2xl font-black text-white uppercase mb-10 border-b border-zinc-800 pb-6 tracking-tight">Items</h2>
-            <div className="space-y-8">
+          <section className="bg-zinc-950 p-5 sm:p-8 lg:p-10 border border-zinc-800">
+            <h2 className="text-2xl font-black text-white uppercase mb-8 border-b border-zinc-800 pb-5 tracking-tight">Items</h2>
+            <div className="space-y-6">
               {cartItems(order).map((item) => {
-                const product = item;
+                const product = (item) as Product;
                 return (
-                  <div key={item._id || item.id || item.productId} className="flex gap-6 group">
-                    <div className="w-24 h-24 bg-black border border-zinc-900 shrink-0 overflow-hidden">
+                  <div key={item._id || item.id || item.productId} className="group flex flex-col gap-5 border-b border-zinc-900 pb-6 last:border-b-0 last:pb-0 sm:flex-row sm:items-start">
+                    <div className="h-28 w-full bg-black border border-zinc-900 overflow-hidden sm:h-24 sm:w-24 sm:shrink-0">
                       <img src={productImage(product)} alt={product?.name || 'Product'} className="w-full h-full object-contain p-4 grayscale group-hover:grayscale-0 transition-all" />
                     </div>
-                    <div className="flex-1 flex justify-between items-start gap-4">
-                      <div>
-                        <h3 className="text-lg font-black text-white uppercase mb-2 group-hover:text-primary transition-colors cursor-pointer" onClick={() => product && navigate(`/product/${productSlug(product)}`)}>{product?.name || 'Product'}</h3>
+                    <div className="min-w-0 flex-1 flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start">
+                      <div className="min-w-0">
+                        <h3 className="break-words text-base sm:text-lg font-black text-white uppercase mb-2 group-hover:text-primary transition-colors cursor-pointer" onClick={() => product && navigate(`/product/${productSlug(product)}`)}>{product?.name || 'Product'}</h3>
                         {item.selectedFlavor ? <p className="text-sm text-zinc-500 uppercase font-bold tracking-widest mb-1">Flavor: {item.selectedFlavor}</p> : null}
                         <p className="text-sm text-zinc-500 uppercase font-bold tracking-widest">Qty: {item.quantity || 1}</p>
                       </div>
-                      <span className="text-xl font-black text-white">{formatPrice(productPrice(product) * Number(item.quantity || 1))}</span>
+                      <span className="shrink-0 text-left text-xl font-black text-white sm:text-right">{formatPrice(productPrice(product) * Number(item.quantity || 1))}</span>
                     </div>
                   </div>
                 );
@@ -117,7 +165,30 @@ export default function OrderDetails() {
           </section>
         </div>
       </div>
+
+      {isProofOpen && proofImage ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/85 p-4" onClick={() => setIsProofOpen(false)}>
+          <div className="relative max-h-[90vh] w-full max-w-4xl" onClick={(event) => event.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setIsProofOpen(false)}
+              className="cursor-pointer absolute -right-2 -top-12 rounded-full border border-zinc-700 bg-zinc-950 px-4 py-2 text-xs font-black uppercase tracking-widest text-white hover:border-primary hover:text-primary"
+            >
+              Close
+            </button>
+            <img src={proofImage} alt="Payment proof" className="max-h-[90vh] w-full rounded-xl border border-zinc-800 bg-zinc-950 object-contain" />
+          </div>
+        </div>
+      ) : null}
     </div>
+  );
+}
+
+function StatusBadge({ label, status, styles }: { label: string; status: string; styles: Record<string, string> }) {
+  return (
+    <span className={`${BADGE_BASE} ${styles[status] || 'bg-zinc-900 text-zinc-300 border-zinc-700'}`}>
+      {label}: {status.replace(/_/g, ' ')}
+    </span>
   );
 }
 
