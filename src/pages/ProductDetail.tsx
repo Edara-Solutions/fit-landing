@@ -75,7 +75,7 @@ export default function ProductDetail() {
     }
   };
 
-  if (product) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><GlobalLoader label="Loading product" /></div>;
+  if (loading && !product) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><GlobalLoader label="Loading product" /></div>;
   if (!product) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><EmptyState title="Product not found" body={error || 'This product is not available.'} /></div>;
 
   const images = product.images?.length ? product.images : [productImage(product)];

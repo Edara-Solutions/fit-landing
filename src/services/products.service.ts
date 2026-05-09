@@ -6,6 +6,7 @@ export interface ProductFilters {
   brand?: string;
   flavor?: string;
   isStack?: boolean | string;
+  isFeatured?: boolean | string;
   minPrice?: string | number;
   maxPrice?: string | number;
   search?: string;
