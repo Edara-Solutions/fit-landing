@@ -2,6 +2,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, CreditCard, XCircle, Upload, CheckCircle, Loader, Image as ImageIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { EmptyState } from '../components/AsyncState';
+import GlobalLoader from '../components/GlobalLoader';
 import { cartItems, formatPrice, getId, productImage, productPrice, productSlug } from '../lib/format';
 import { useToast } from '../lib/toast';
 import { useCheckoutStore } from '../stores/checkout.store';
@@ -50,7 +51,7 @@ export default function OrderDetails() {
     }
   };
 
-  if (loading && !order) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><EmptyState title="Loading order..." /></div>;
+  if (loading && !order) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><GlobalLoader label="Loading order" /></div>;
   if (!order) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><EmptyState title="Order not found" body={error || 'We could not find this order.'} /></div>;
 
   const proofImage = typeof order.payment === 'object' && order.payment && 'proofImage' in order.payment

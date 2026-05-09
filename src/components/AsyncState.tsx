@@ -1,17 +1,10 @@
+import GlobalLoader from './GlobalLoader';
+
 export function LoadingGrid({ count = 8 }: { count?: number }) {
   return (
-    <>
-      {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className="animate-pulse border border-zinc-800 bg-zinc-950">
-          <div className="aspect-[4/5] bg-zinc-900" />
-          <div className="space-y-4 p-8">
-            <div className="h-4 w-3/4 bg-zinc-800" />
-            <div className="h-4 w-1/3 bg-zinc-800" />
-            <div className="h-11 rounded-full bg-zinc-900" />
-          </div>
-        </div>
-      ))}
-    </>
+    <div className="col-span-full border border-zinc-800 bg-zinc-950">
+      <GlobalLoader label={count > 1 ? 'Loading products' : 'Loading'} />
+    </div>
   );
 }
 

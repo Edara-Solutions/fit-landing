@@ -4,6 +4,7 @@ import { Star, ShoppingCart, Truck, ChevronDown, Plus, Minus, ArrowRight, PlusCi
 import { motion } from 'motion/react';
 import ProductCard from '../components/ProductCard';
 import { EmptyState } from '../components/AsyncState';
+import GlobalLoader from '../components/GlobalLoader';
 import { formatPrice, getName, isSoldOut, productId, productImage, productOriginalPrice, productPrice, productSlug } from '../lib/format';
 import { useToast } from '../lib/toast';
 import { reviewsService } from '../services/reviews.service';
@@ -74,7 +75,7 @@ export default function ProductDetail() {
     }
   };
 
-  if (loading && !product) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><EmptyState title="Loading product..." /></div>;
+  if (product) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><GlobalLoader label="Loading product" /></div>;
   if (!product) return <div className="max-w-7xl mx-auto px-6 md:px-10 py-24"><EmptyState title="Product not found" body={error || 'This product is not available.'} /></div>;
 
   const images = product.images?.length ? product.images : [productImage(product)];

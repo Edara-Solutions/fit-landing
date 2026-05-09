@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Upload } from 'lucide-react';
 import { EmptyState } from '../components/AsyncState';
+import GlobalLoader from '../components/GlobalLoader';
 import { formatPrice } from '../lib/format';
 import { useToast } from '../lib/toast';
 import { useCheckoutStore } from '../stores/checkout.store';
@@ -40,7 +41,7 @@ export default function Payment() {
       <h1 className="mt-6 text-4xl md:text-5xl font-black uppercase text-white tracking-tighter">Payment Instructions</h1>
       {error ? <div className="mt-8"><EmptyState title="Could not load instructions" body={error} /></div> : null}
       <section className="mt-8 border border-zinc-800 bg-zinc-950 p-8">
-        {loading && !paymentInstructions ? <p className="text-zinc-400">Loading instructions...</p> : (
+        {loading && !paymentInstructions ? <GlobalLoader label="Loading payment instructions" className="min-h-48" /> : (
           <div className="space-y-3">
             {paymentInstructions ? Object.entries(paymentInstructions).map(([key, value]) => (
               <div key={key} className="flex justify-between gap-6 border-b border-zinc-800 pb-3 text-sm">

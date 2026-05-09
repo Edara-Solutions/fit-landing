@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { EmptyState } from '../components/AsyncState';
+import GlobalLoader from '../components/GlobalLoader';
 import { formatPrice, getId } from '../lib/format';
 import { useCheckoutStore } from '../stores/checkout.store';
 
@@ -50,7 +51,7 @@ export default function Orders() {
       {error ? <EmptyState title="Could not load orders" body={error} /> : null}
       {!orders.length && !loading ? <EmptyState title="No orders yet" body="Your completed checkouts will appear here." /> : null}
       <div className="space-y-6">
-        {loading ? <EmptyState title="Loading orders..." /> : orders.map((order, index) => (
+        {loading ? <GlobalLoader label="Loading orders" /> : orders.map((order, index) => (
           <motion.div key={getId(order)} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.06 }} className="group relative bg-black border border-zinc-800 p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-primary transition-all duration-300">
             <div className="flex flex-col gap-4 w-full md:w-auto">
               <div className="flex items-center gap-4">
