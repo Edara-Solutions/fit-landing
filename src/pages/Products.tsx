@@ -35,7 +35,10 @@ export default function Products() {
     minPrice: params.get('minPrice') || '',
     maxPrice: params.get('maxPrice') || '',
     isStack: params.get('isStack') || '',
+    isFeatured: params.get('isFeatured') || '',
   }), [params]);
+
+  console.log("activeFilters", activeFilters);
 
   useEffect(() => {
     fetchCategories();
@@ -105,29 +108,29 @@ export default function Products() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-10 py-24">
-      <header className="flex flex-col gap-8 mb-12">
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div>
-              <h1 className="text-5xl md:text-6xl font-black text-white uppercase tracking-tighter">Gear Up</h1>
-              <p className="mt-3 max-w-xl text-sm text-zinc-500">Search, filter, and stack your next training cycle.</p>
-            </div>
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="inline-flex w-fit items-center gap-2 rounded-full border border-zinc-800 bg-zinc-950 px-5 py-3 text-xs font-black uppercase tracking-widest text-zinc-300 transition-colors hover:border-primary hover:text-primary"
-            >
-              <X size={15} />
-              Clear Filters
-            </button>
-          </div>
+      <header className="mb-12 flex flex-col gap-8 md:flex-row md:items-end justify-between">
+        <div>
+          <h1 className="text-5xl md:text-6xl font-black text-white uppercase tracking-tighter">Gear Up</h1>
+          <p className="mt-3 max-w-xl text-sm text-zinc-500">Search, filter, and stack your next training cycle.</p>
+        </div>
+        <button
+          type="button"
+          onClick={clearFilters}
+          className="inline-flex w-fit items-center gap-2 rounded-full border border-zinc-800 bg-zinc-950 px-5 py-3 text-xs font-black uppercase tracking-widest text-zinc-300 transition-colors hover:border-primary hover:text-primary"
+        >
+          <X size={15} />
+          Clear Filters
+        </button>
+      </header>
 
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
+        <aside className="flex flex-col gap-8 lg:sticky lg:top-32">
           <form
             onSubmit={(event) => {
               event.preventDefault();
               updateParam('search', search);
             }}
-            className="flex flex-col gap-3 rounded-2xl border border-zinc-800 bg-zinc-950 p-3 shadow-2xl shadow-black/20 sm:flex-row"
+            className="flex flex-col gap-3 rounded-2xl border border-zinc-800 bg-zinc-950 p-3 shadow-2xl shadow-black/20 sm:flex-row lg:flex-col"
           >
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
@@ -146,20 +149,19 @@ export default function Products() {
               Search
             </button>
           </form>
-        </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
-          <div className="mb-5 flex items-center gap-3 border-b border-zinc-800 pb-4">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-primary">
-              <SlidersHorizontal size={17} />
-            </span>
-            <div>
-              <h2 className="text-sm font-black uppercase tracking-widest text-white">Filters</h2>
-              <p className="text-xs text-zinc-500">Refine by catalog, brand, type, sort, and price.</p>
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
+            <div className="mb-5 flex items-center gap-3 border-b border-zinc-800 pb-4">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-primary">
+                <SlidersHorizontal size={17} />
+              </span>
+              <div>
+                <h2 className="text-sm font-black uppercase tracking-widest text-white">Filters</h2>
+                <p className="text-xs text-zinc-500">Refine by catalog, brand, type, sort, and price.</p>
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4">
             <FilterSelect label="Category" value={activeFilters.category} onChange={(value) => updateParam('category', value)}>
               <option value="">All categories</option>
               {categories.map((category) => <option key={getId(category)} value={getId(category)}>{getName(category)}</option>)}
@@ -202,26 +204,29 @@ export default function Products() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-1">
               <RangeControl label="Minimum" value={priceRange.min} min={PRICE_MIN} max={priceRange.max} onChange={handleMinPrice} />
               <RangeControl label="Maximum" value={priceRange.max} min={priceRange.min} max={PRICE_MAX} onChange={handleMaxPrice} />
             </div>
           </div>
         </div>
-      </header>
+        </aside>
 
-      {error ? <EmptyState title="Could not load products" body={error} /> : null}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {loading ? <LoadingGrid /> : products.length ? products.map((product, index) => <ProductCard key={getId(product)} product={product} index={index} onAdd={handleAdd} />) : <div className="lg:col-span-4"><EmptyState title="No products found" body="Try clearing filters or searching for something else." /></div>}
+        <main>
+          {error ? <EmptyState title="Could not load products" body={error} /> : null}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {loading ? <LoadingGrid /> : products.length ? products.map((product, index) => <ProductCard key={getId(product)} product={product} index={index} onAdd={handleAdd} />) : <div className="xl:col-span-3"><EmptyState title="No products found" body="Try clearing filters or searching for something else." /></div>}
+          </div>
+
+          {pagination.pages > 1 && (
+            <div className="mt-12 flex items-center justify-center gap-3">
+              <button disabled={pagination.page <= 1} onClick={() => updateParam('page', pagination.page - 1)} className="rounded-full border border-zinc-800 px-5 py-2 font-bold uppercase text-white disabled:opacity-40">Prev</button>
+              <span className="text-sm text-zinc-400">Page {pagination.page} of {pagination.pages}</span>
+              <button disabled={pagination.page >= pagination.pages} onClick={() => updateParam('page', pagination.page + 1)} className="rounded-full border border-zinc-800 px-5 py-2 font-bold uppercase text-white disabled:opacity-40">Next</button>
+            </div>
+          )}
+        </main>
       </div>
-
-      {pagination.pages > 1 && (
-        <div className="mt-12 flex items-center justify-center gap-3">
-          <button disabled={pagination.page <= 1} onClick={() => updateParam('page', pagination.page - 1)} className="rounded-full border border-zinc-800 px-5 py-2 font-bold uppercase text-white disabled:opacity-40">Prev</button>
-          <span className="text-sm text-zinc-400">Page {pagination.page} of {pagination.pages}</span>
-          <button disabled={pagination.page >= pagination.pages} onClick={() => updateParam('page', pagination.page + 1)} className="rounded-full border border-zinc-800 px-5 py-2 font-bold uppercase text-white disabled:opacity-40">Next</button>
-        </div>
-      )}
     </div>
   );
 }

@@ -9,7 +9,7 @@ export default function Stacks() {
   const { products, loading, error, fetchProducts } = useCatalogStore();
 
   useEffect(() => {
-    fetchProducts({ isStack: true, page: 1, limit: 12 });
+    fetchProducts({ isStack: true, isFeatured: undefined, page: 1, limit: 12 });
   }, [fetchProducts]);
 
   return (
