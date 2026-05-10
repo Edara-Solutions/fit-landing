@@ -12,6 +12,7 @@ interface CartState {
   updateItem: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
+  resetCart: () => void;
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -86,5 +87,8 @@ export const useCartStore = create<CartState>((set, get) => ({
       set({ cart: previous, error: apiError.message, loading: false });
       throw apiError;
     }
+  },
+  resetCart() {
+    set({ cart: null, loading: false, error: null });
   },
 }));
