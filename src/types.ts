@@ -7,6 +7,12 @@ export interface Pagination {
   pages: number;
 }
 
+export interface ShippingCity {
+  name: string;
+  shippingFee: number;
+  isActive?: boolean;
+}
+
 export interface Category {
   _id?: string;
   id?: string;

@@ -1,8 +1,9 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { EmptyState } from '../components/AsyncState';
 import { getId } from '../lib/format';
 import { useToast } from '../lib/toast';
 import { useAuthStore } from '../stores/auth.store';
+import { useShippingCitiesStore } from '../stores/shippingCities.store';
 import { Address } from '../types';
 
 const blankAddress: Address = { fullName: '', phone: '', city: '', area: '', street: '', buildingNumber: '', apartmentNumber: '', notes: '' };
@@ -10,11 +11,17 @@ const blankAddress: Address = { fullName: '', phone: '', city: '', area: '', str
 export default function Account() {
   const { notify } = useToast();
   const { customer, loading, updateProfile, changePassword, addAddress, updateAddress, deleteAddress, setDefaultAddress } = useAuthStore();
+  const { cities, fetchShippingCities } = useShippingCitiesStore();
   const [profile, setProfile] = useState({ fullName: customer?.fullName || '', phone: customer?.phone || '' });
   const [password, setPassword] = useState({ currentPassword: '', newPassword: '' });
   const [address, setAddress] = useState<Address>(blankAddress);
   const [editingId, setEditingId] = useState('');
   const addresses = customer?.addresses || [];
+  const selectedAddressCity = cities.find((city) => city.name === address.city);
+
+  useEffect(() => {
+    fetchShippingCities();
+  }, [fetchShippingCities]);
 
   const saveProfile = async (event: FormEvent) => {
     event.preventDefault();
@@ -39,6 +46,10 @@ export default function Account() {
 
   const saveAddress = async (event: FormEvent) => {
     event.preventDefault();
+    if (!selectedAddressCity) {
+      notify('Please choose an available shipping city.', 'error');
+      return;
+    }
     try {
       if (editingId) await updateAddress(editingId, address);
       else await addAddress(address);
@@ -107,9 +118,17 @@ export default function Account() {
           </div>
 
           <form onSubmit={saveAddress} className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {(['fullName', 'phone', 'city', 'area', 'street', 'buildingNumber', 'apartmentNumber', 'notes'] as (keyof Address)[]).map((key) => (
-              <input key={key} value={String(address[key] || '')} onChange={(event) => setAddress({ ...address, [key]: event.target.value })} placeholder={key.replace(/([A-Z])/g, ' $1')} className={`${key === 'street' || key === 'notes' ? 'md:col-span-2' : ''} bg-zinc-900 border border-zinc-800 p-4 text-white`} />
-            ))}
+            <input value={address.fullName || ''} onChange={(event) => setAddress({ ...address, fullName: event.target.value })} placeholder="Full name" className="bg-zinc-900 border border-zinc-800 p-4 text-white" />
+            <input value={address.phone || ''} onChange={(event) => setAddress({ ...address, phone: event.target.value })} placeholder="Phone" className="bg-zinc-900 border border-zinc-800 p-4 text-white" />
+            <select value={address.city || ''} onChange={(event) => setAddress({ ...address, city: event.target.value })} className="bg-zinc-900 border border-zinc-800 p-4 text-white">
+              <option value="">Choose city</option>
+              {cities.map((city) => <option key={city.name} value={city.name}>{city.name}</option>)}
+            </select>
+            <input value={address.area || ''} onChange={(event) => setAddress({ ...address, area: event.target.value })} placeholder="Area" className="bg-zinc-900 border border-zinc-800 p-4 text-white" />
+            <input value={address.street || ''} onChange={(event) => setAddress({ ...address, street: event.target.value })} placeholder="Street" className="md:col-span-2 bg-zinc-900 border border-zinc-800 p-4 text-white" />
+            <input value={address.buildingNumber || ''} onChange={(event) => setAddress({ ...address, buildingNumber: event.target.value })} placeholder="Building number" className="bg-zinc-900 border border-zinc-800 p-4 text-white" />
+            <input value={address.apartmentNumber || ''} onChange={(event) => setAddress({ ...address, apartmentNumber: event.target.value })} placeholder="Apartment number" className="bg-zinc-900 border border-zinc-800 p-4 text-white" />
+            <input value={address.notes || ''} onChange={(event) => setAddress({ ...address, notes: event.target.value })} placeholder="Notes" className="md:col-span-2 bg-zinc-900 border border-zinc-800 p-4 text-white" />
             <button disabled={loading} className="md:col-span-2 rounded-full bg-primary px-8 py-3 font-black uppercase text-white disabled:opacity-60">{editingId ? 'Update Address' : 'Add Address'}</button>
           </form>
         </div>

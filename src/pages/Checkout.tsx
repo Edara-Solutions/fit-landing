@@ -8,6 +8,7 @@ import { useToast } from '../lib/toast';
 import { useAuthStore } from '../stores/auth.store';
 import { useCartStore } from '../stores/cart.store';
 import { useCheckoutStore } from '../stores/checkout.store';
+import { useShippingCitiesStore } from '../stores/shippingCities.store';
 import { Address } from '../types';
 
 const emptyAddress: Address = { fullName: '', phone: '', city: '', area: '', street: '', buildingNumber: '', apartmentNumber: '', notes: '' };
@@ -18,13 +19,15 @@ export default function Checkout() {
   const { customer } = useAuthStore();
   const { cart, fetchCart } = useCartStore();
   const { coupon, discount, freeShipping, paymentMethod, loading, validateCoupon, clearCoupon, createOrder, setPaymentMethod } = useCheckoutStore();
+  const { cities, fetchShippingCities } = useShippingCitiesStore();
   const [addressId, setAddressId] = useState('');
   const [address, setAddress] = useState<Address>(emptyAddress);
   const [couponCode, setCouponCode] = useState('');
   const [notes, setNotes] = useState('');
   const items = cartItems(cart);
   const subtotal = cartSubtotal(cart);
-  const shippingFee = freeShipping || subtotal <= 0 ? 0 : 50;
+  const selectedShippingCity = cities.find((city) => city.name === address.city);
+  const shippingFee = freeShipping || subtotal <= 0 ? 0 : selectedShippingCity?.shippingFee || 0;
   const total = Math.max(0, subtotal + shippingFee - discount);
   const isCouponVerified = Boolean(couponCode.trim() && coupon);
 
@@ -33,6 +36,10 @@ export default function Checkout() {
   useEffect(() => {
     fetchCart().catch(() => undefined);
   }, [fetchCart]);
+
+  useEffect(() => {
+    fetchShippingCities();
+  }, [fetchShippingCities]);
 
   useEffect(() => {
     const defaultAddress = addresses.find((item) => item.isDefault) || addresses[0];
@@ -69,13 +76,16 @@ export default function Checkout() {
       notify('Please complete your shipping details.', 'error');
       return;
     }
+    if (!selectedShippingCity) {
+      notify('Please choose an available shipping city.', 'error');
+      return;
+    }
     try {
       const order = await createOrder({
         shippingDetails: address,
         paymentMethod,
         couponCode: couponCode || undefined,
         notes: notes || undefined,
-        shippingFee,
       });
       await fetchCart().catch(() => undefined);
       notify('Order created. Continue with payment proof.', 'success');
@@ -110,7 +120,10 @@ export default function Checkout() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input value={address.fullName || ''} onChange={(event) => updateAddress('fullName', event.target.value)} placeholder="Full name" className="bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary" />
             <input value={address.phone || ''} onChange={(event) => updateAddress('phone', event.target.value)} placeholder="Phone" className="bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary" />
-            <input value={address.city || ''} onChange={(event) => updateAddress('city', event.target.value)} placeholder="City" className="bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary" />
+            <select value={address.city || ''} onChange={(event) => updateAddress('city', event.target.value)} className="bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary">
+              <option value="">Choose city</option>
+              {cities.map((city) => <option key={city.name} value={city.name}>{city.name}</option>)}
+            </select>
             <input value={address.area || ''} onChange={(event) => updateAddress('area', event.target.value)} placeholder="Area" className="bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary" />
             <input value={address.street || ''} onChange={(event) => updateAddress('street', event.target.value)} placeholder="Street" className="col-span-full bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary" />
             <input value={address.buildingNumber || ''} onChange={(event) => updateAddress('buildingNumber', event.target.value)} placeholder="Building number" className="bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary" />

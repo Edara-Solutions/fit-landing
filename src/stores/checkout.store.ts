@@ -67,7 +67,7 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
     set({ loading: true, error: null });
     try {
       const { order } = await ordersService.create(payload);
-      set({ currentOrder: order, loading: false });
+      set({ currentOrder: order, coupon: null, discount: 0, freeShipping: false, loading: false });
       return order;
     } catch (error) {
       const apiError = normalizeApiError(error);

@@ -6,7 +6,6 @@ export interface CreateOrderPayload {
   paymentMethod: 'vodafone_cash' | 'instapay';
   couponCode?: string;
   notes?: string;
-  shippingFee?: number;
 }
 
 export const ordersService = {
