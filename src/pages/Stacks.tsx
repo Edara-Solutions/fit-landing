@@ -5,11 +5,24 @@ import ProductCard from '../components/ProductCard';
 import { getId } from '../lib/format';
 import { useCatalogStore } from '../stores/catalog.store';
 
+const STACK_FILTERS = {
+  category: '',
+  brand: '',
+  search: '',
+  minPrice: '',
+  maxPrice: '',
+  isStack: true,
+  isFeatured: '',
+  page: 1,
+  limit: 12,
+  sort: '-createdAt',
+};
+
 export default function Stacks() {
   const { products, loading, error, fetchProducts } = useCatalogStore();
 
   useEffect(() => {
-    fetchProducts({ isStack: true, isFeatured: undefined, page: 1, limit: 12 });
+    fetchProducts(STACK_FILTERS);
   }, [fetchProducts]);
 
   return (

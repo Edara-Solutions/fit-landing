@@ -38,8 +38,6 @@ export default function Products() {
     isFeatured: params.get('isFeatured') || '',
   }), [params]);
 
-  console.log("activeFilters", activeFilters);
-
   useEffect(() => {
     fetchCategories();
     fetchBrands();
