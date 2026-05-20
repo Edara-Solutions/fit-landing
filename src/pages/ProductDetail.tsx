@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import ProductCard from '../components/ProductCard';
 import { EmptyState } from '../components/AsyncState';
 import GlobalLoader from '../components/GlobalLoader';
-import { formatPrice, getName, isSoldOut, productId, productImage, productOriginalPrice, productPrice, productSlug } from '../lib/format';
+import { formatPrice, getName, isSoldOut, productId, productImage, productOriginalPrice, productPrice, productSlug, productTextList } from '../lib/format';
 import { useToast } from '../lib/toast';
 import { reviewsService } from '../services/reviews.service';
 import { useAuthStore } from '../stores/auth.store';
@@ -26,8 +26,6 @@ export default function ProductDetail() {
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
-
-  console.log("product", product);
 
   useEffect(() => {
     fetchProductBySlug(slug).then((loaded) => {
@@ -87,8 +85,8 @@ export default function ProductDetail() {
     ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
     : 0;
   const nutritionFacts = product.nutritionFacts ? Object.entries(product.nutritionFacts).filter(([, value]) => value !== null && value !== undefined && value !== '') : [];
-  const usageInstructions = toTextList(product.usageInstructions);
-  const warnings = toTextList(product.warnings);
+  const usageInstructions = productTextList(product.usageInstructions);
+  const warnings = productTextList(product.warnings);
 
   return (
     <main className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-24">
@@ -253,13 +251,4 @@ export default function ProductDetail() {
       </section>
     </main>
   );
-}
-
-function toTextList(value?: string | string[]) {
-  if (!value) return [];
-  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
-  return String(value)
-    .split(/\r?\n|\. /)
-    .map((item) => item.trim().replace(/\.$/, ''))
-    .filter(Boolean);
 }

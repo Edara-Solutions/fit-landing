@@ -12,6 +12,7 @@ import { useShippingCitiesStore } from '../stores/shippingCities.store';
 import { Address } from '../types';
 
 const emptyAddress: Address = { fullName: '', phone: '', city: '', area: '', street: '', buildingNumber: '', apartmentNumber: '', notes: '' };
+const normalizeCity = (value?: string) => value?.trim().toLowerCase() || '';
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export default function Checkout() {
   const [notes, setNotes] = useState('');
   const items = cartItems(cart);
   const subtotal = cartSubtotal(cart);
-  const selectedShippingCity = cities.find((city) => city.name === address.city);
+  const selectedShippingCity = cities.find((city) => normalizeCity(city.name) === normalizeCity(address.city));
   const shippingFee = freeShipping || subtotal <= 0 ? 0 : selectedShippingCity?.shippingFee || 0;
   const total = Math.max(0, subtotal + shippingFee - discount);
   const isCouponVerified = Boolean(couponCode.trim() && coupon);
@@ -76,7 +77,7 @@ export default function Checkout() {
       notify('Please complete your shipping details.', 'error');
       return;
     }
-    if (!selectedShippingCity) {
+    if (cities.length > 0 && !selectedShippingCity) {
       notify('Please choose an available shipping city.', 'error');
       return;
     }
@@ -192,7 +193,7 @@ export default function Checkout() {
             <span className="text-3xl font-black text-white">{formatPrice(total)}</span>
           </div>
 
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} disabled={loading} className="cursor-pointer w-full bg-primary text-white font-black uppercase py-6 rounded-full tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:bg-primary-hover transition-all disabled:opacity-60">
+          <motion.button type="submit" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} disabled={loading} className="cursor-pointer w-full bg-primary text-white font-black uppercase py-6 rounded-full tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:bg-primary-hover transition-all disabled:opacity-60">
             <Lock size={18} />
             {loading ? 'Creating...' : 'Create Order'}
           </motion.button>

@@ -127,6 +127,7 @@ export interface Order {
   orderStatus?: string;
   paymentStatus?: string;
   paymentMethod?: 'vodafone_cash' | 'instapay';
+  rejectionReason?: string;
   payment?: unknown;
   shippingDetails?: Address;
   createdAt?: string;

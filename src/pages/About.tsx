@@ -44,7 +44,7 @@ export default function About() {
             <h2 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter mb-8">The Mission</h2>
             <div className="w-16 h-1 bg-primary mb-10"></div>
             <p className="text-zinc-400 mb-6 leading-relaxed">
-              BE-FOX Supplements was forged in the fires of competitive necessity. We saw a market saturated with under-dosed, proprietary blends hiding behind flashy marketing. The mission was brutally simple: engineer the highest-grade, scientifically validated sports nutrition on the planet.
+              FIT Supplements was forged in the fires of competitive necessity. We saw a market saturated with under-dosed, proprietary blends hiding behind flashy marketing. The mission was brutally simple: engineer the highest-grade, scientifically validated sports nutrition on the planet.
             </p>
             <p className="text-zinc-400 leading-relaxed">
               No fillers. No compromises. Just absolute, unadulterated performance fuel designed to push the human body beyond its perceived threshold. We stand for transparency, intensity, and the relentless pursuit of physical supremacy.

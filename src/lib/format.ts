@@ -38,6 +38,15 @@ export function isSoldOut(product?: Product | null) {
   return Boolean(product?.isSoldOut || product?.stock === 0 || product?.status === 'out_of_stock');
 }
 
+export function productTextList(value?: string | string[] | null) {
+  if (!value) return [];
+  const items = Array.isArray(value) ? value : value.split(/\r?\n|\. /);
+
+  return items
+    .map((item) => String(item).trim().replace(/\.$/, ''))
+    .filter(Boolean);
+}
+
 export function formatPrice(value?: number | string | null) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EGP', maximumFractionDigits: 2 }).format(Number(value || 0));
 }

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cartItems } from '../lib/format';
 import { useAuthStore } from '../stores/auth.store';
 import { useCartStore } from '../stores/cart.store';
-import logo from '../assets/images/fox-logo.png';
+import logo from '../assets/images/logo.png';
 
 const LINKS = [
   { name: 'Products', href: '/products' },
@@ -25,8 +25,7 @@ export default function Navbar() {
     <nav className="bg-black border-b border-zinc-900 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 md:px-10 h-20 md:h-24 flex items-center justify-between">
         <Link to="/" className="text-3xl md:text-4xl font-black text-white italic tracking-tighter flex items-center">
-          <img src={logo} alt="BE-FOX" className="h-12 md:h-16" />
-          <span className="mx-2 text-lg md:text-3xl">BE-FOX</span>
+          <img src={logo} alt="FIT" className="h-16 md:h-22" />
         </Link>
 
         <div className="hidden md:flex items-center gap-8">

@@ -57,6 +57,9 @@ export default function OrderDetails() {
   const proofImage = typeof order.payment === 'object' && order.payment && 'proofImage' in order.payment
     ? String((order.payment as { proofImage?: string }).proofImage || '')
     : '';
+  const rejectionReason = order.paymentStatus === 'rejected'
+    ? getPaymentRejectionReason(order)
+    : '';
 
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-10 py-12 pb-32">
@@ -98,6 +101,16 @@ export default function OrderDetails() {
                 <span className="mt-1 block text-xs text-zinc-500 group-hover:text-zinc-300">Click to preview receipt</span>
               </span>
             </button>
+          ) : null}
+
+          {rejectionReason ? (
+            <div className="rounded-xl border border-red-800/70 bg-red-950/30 p-4 text-sm text-red-100">
+              <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-red-200">
+                <XCircle size={15} />
+                Payment Rejected
+              </div>
+              <p className="leading-relaxed text-red-50">{rejectionReason}</p>
+            </div>
           ) : null}
         </div>
         </div>
@@ -191,6 +204,19 @@ function StatusBadge({ label, status, styles }: { label: string; status: string;
       {label}: {status.replace(/_/g, ' ')}
     </span>
   );
+}
+
+function getPaymentRejectionReason(order: { rejectionReason?: string; payment?: unknown }) {
+  if (typeof order.rejectionReason === 'string' && order.rejectionReason.trim()) {
+    return order.rejectionReason.trim();
+  }
+
+  if (typeof order.payment === 'object' && order.payment && 'rejectionReason' in order.payment) {
+    const reason = (order.payment as { rejectionReason?: unknown }).rejectionReason;
+    return typeof reason === 'string' ? reason.trim() : '';
+  }
+
+  return '';
 }
 
 function SummaryRow({ label, value }: { label: string; value?: number }) {

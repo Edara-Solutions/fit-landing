@@ -15,7 +15,7 @@ export default function Affiliate() {
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 w-full text-center flex flex-col items-center">
-          <span className="text-primary font-black tracking-widest uppercase mb-6 block text-sm">BE-FOX Elite Network</span>
+          <span className="text-primary font-black tracking-widest uppercase mb-6 block text-sm">FIT Elite Network</span>
           <motion.h1 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -88,7 +88,7 @@ export default function Affiliate() {
           <div className="max-w-2xl">
             <h2 className="text-4xl md:text-6xl font-black uppercase text-white mb-8 tracking-tighter">Ready to Join the Pack?</h2>
             <p className="text-lg text-zinc-400 mb-12">
-              We don't accept everyone. We are looking for athletes, trainers, and influencers who live the BE-FOX ethos. If you are built to perform and ready to dominate your space, submit your application.
+              We don't accept everyone. We are looking for athletes, trainers, and influencers who live the FIT ethos. If you are built to perform and ready to dominate your space, submit your application.
             </p>
             <form className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
