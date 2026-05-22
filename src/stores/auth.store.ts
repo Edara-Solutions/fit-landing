@@ -4,6 +4,7 @@ import { normalizeApiError } from '../lib/apiClient';
 import { authService, LoginPayload, RegisterPayload } from '../services/auth.service';
 import { Address, Customer } from '../types';
 import { useCartStore } from './cart.store';
+import { useCheckoutStore } from './checkout.store';
 
 interface AuthState {
   customer: Customer | null;
@@ -55,6 +56,7 @@ export const useAuthStore = create<AuthState>()(
       },
       logout() {
         useCartStore.getState().resetCart();
+        useCheckoutStore.getState().resetCheckout();
         set({ customer: null, token: null, isAuthenticated: false, loading: false, error: null });
       },
       async fetchMe() {

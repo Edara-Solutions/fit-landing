@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, Minus, Plus, ShoppingCart } from 'lucide-react';
+import { ChevronDown, Layers3, Minus, Plus, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 import { formatPrice, isSoldOut, productId, productImage, productOriginalPrice, productPrice, productSlug } from '../lib/format';
 import { Product } from '../types';
@@ -37,8 +37,14 @@ export default function ProductCard({
       className="flex cursor-pointer flex-col bg-zinc-950 border border-zinc-800 group hover:border-primary transition-colors duration-300 rounded-lg overflow-hidden"
     >
       <div className="relative aspect-[4/5] bg-zinc-900 overflow-hidden">
+        {product.isStack ? (
+          <span className="absolute right-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-black/85 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary shadow-lg shadow-primary/20 backdrop-blur">
+            <Layers3 size={13} />
+            Stack
+          </span>
+        ) : null}
         {(product.discountPrice || product.isSale) && (
-          <span className="absolute top-4 left-4 bg-primary text-white font-black uppercase text-[10px] px-3 py-1 z-10 tracking-widest rounded-sm">
+          <span className="absolute -left-10 top-6 z-10 flex h-8 w-36 -rotate-45 items-center justify-center border-y border-white/25 bg-primary text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-primary/30">
             Sale
           </span>
         )}

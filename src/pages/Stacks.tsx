@@ -1,8 +1,11 @@
 import { motion } from 'motion/react';
 import { useEffect } from 'react';
 import { EmptyState, LoadingGrid } from '../components/AsyncState';
-import ProductCard from '../components/ProductCard';
+import ProductCard, { AddProductPayload } from '../components/ProductCard';
 import { getId } from '../lib/format';
+import { useToast } from '../lib/toast';
+import { useAuthStore } from '../stores/auth.store';
+import { useCartStore } from '../stores/cart.store';
 import { useCatalogStore } from '../stores/catalog.store';
 
 const STACK_FILTERS = {
@@ -20,10 +23,30 @@ const STACK_FILTERS = {
 
 export default function Stacks() {
   const { products, loading, error, fetchProducts } = useCatalogStore();
+  const { addItem } = useCartStore();
+  const { isAuthenticated } = useAuthStore();
+  const { notify } = useToast();
 
   useEffect(() => {
     fetchProducts(STACK_FILTERS);
   }, [fetchProducts]);
+
+  const handleAdd = async ({ product, quantity, selectedFlavor }: AddProductPayload) => {
+    if (!isAuthenticated) {
+      notify('Please log in to add items to your cart.', 'error');
+      return;
+    }
+    if (product.flavors?.length && !selectedFlavor) {
+      notify('Please choose a flavor first.', 'error');
+      return;
+    }
+    try {
+      await addItem(getId(product), quantity, selectedFlavor);
+      notify('Added to cart.', 'success');
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'Could not add item to cart.', 'error');
+    }
+  };
 
   return (
     <div className="flex flex-col">
@@ -45,7 +68,7 @@ export default function Stacks() {
       <section className="max-w-7xl mx-auto px-6 md:px-10 py-24 w-full">
         {error ? <EmptyState title="Could not load stacks" body={error} /> : null}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {loading ? <LoadingGrid /> : products.length ? products.map((stack, index) => <ProductCard key={getId(stack)} product={stack} index={index} />) : <div className="lg:col-span-4"><EmptyState title="No stacks available" /></div>}
+          {loading ? <LoadingGrid /> : products.length ? products.map((stack, index) => <ProductCard key={getId(stack)} product={stack} index={index} onAdd={handleAdd} />) : <div className="lg:col-span-4"><EmptyState title="No stacks available" /></div>}
         </div>
       </section>
     </div>

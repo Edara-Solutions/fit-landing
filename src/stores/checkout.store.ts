@@ -28,21 +28,26 @@ interface CheckoutState {
   cancelOrder: (id: string) => Promise<void>;
   fetchPaymentInstructions: (orderId: string) => Promise<void>;
   submitPaymentProof: (orderId: string, formData: FormData) => Promise<void>;
+  resetCheckout: () => void;
 }
 
-export const useCheckoutStore = create<CheckoutState>((set) => ({
+const defaultCheckoutState = {
   coupon: null,
   discount: 0,
   freeShipping: false,
   selectedAddress: null,
   shippingDetails: null,
-  paymentMethod: 'vodafone_cash',
+  paymentMethod: 'vodafone_cash' as const,
   orders: [],
   currentOrder: null,
   paymentInstructions: null,
   pagination: { page: 1, limit: 12, total: 0, pages: 0 },
   loading: false,
   error: null,
+};
+
+export const useCheckoutStore = create<CheckoutState>((set) => ({
+  ...defaultCheckoutState,
   setShippingDetails(address) {
     set({ selectedAddress: address, shippingDetails: address });
   },
@@ -130,5 +135,8 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
       set({ error: apiError.message, loading: false });
       throw apiError;
     }
+  },
+  resetCheckout() {
+    set(defaultCheckoutState);
   },
 }));
