@@ -3,6 +3,8 @@ import { ArrowLeft, MapPin, CreditCard, XCircle, Upload, CheckCircle, Loader, Im
 import { useEffect, useState } from 'react';
 import { EmptyState } from '../components/AsyncState';
 import GlobalLoader from '../components/GlobalLoader';
+import instapayLogo from '../assets/images/instapay.png';
+import vodafoneCashLogo from '../assets/images/vodafonecash.jpg';
 import { cartItems, formatPrice, getId, productImage, productPrice, productSlug } from '../lib/format';
 import { useToast } from '../lib/toast';
 import { useCheckoutStore } from '../stores/checkout.store';
@@ -30,6 +32,19 @@ const PAYMENT_STATUS_STYLES: Record<string, string> = {
 };
 
 const BADGE_BASE = 'inline-flex items-center rounded-full border px-4 py-2 text-xs font-black uppercase tracking-widest';
+
+const PAYMENT_METHODS: Record<string, { label: string; image: string; detail: string }> = {
+  vodafone_cash: {
+    label: 'Vodafone Cash',
+    image: vodafoneCashLogo,
+    detail: 'Manual wallet transfer',
+  },
+  instapay: {
+    label: 'InstaPay',
+    image: instapayLogo,
+    detail: 'Instant bank transfer',
+  },
+};
 
 export default function OrderDetails() {
   const { id = '' } = useParams();
@@ -60,6 +75,7 @@ export default function OrderDetails() {
   const rejectionReason = order.paymentStatus === 'rejected'
     ? getPaymentRejectionReason(order)
     : '';
+  const paymentMethod = getPaymentMethodMeta(order.paymentMethod);
 
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-10 py-12 pb-32">
@@ -69,10 +85,10 @@ export default function OrderDetails() {
       </Link>
 
       <div className="mb-16 overflow-hidden border border-zinc-800 bg-zinc-950">
-        <div className="flex flex-col gap-8 p-8 md:p-10 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-8 p-5 sm:p-8 md:p-10 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <p className="mb-3 text-xs font-black uppercase tracking-[0.25em] text-primary">Order Details</p>
-          <h1 className="break-words text-4xl md:text-3xl font-black text-white uppercase tracking-tighter mb-4">Order #{order.orderNumber || getId(order).slice(-8)}</h1>
+          <h1 className="break-words text-3xl font-black uppercase leading-tight tracking-tight text-white sm:text-4xl md:text-3xl">Order #{order.orderNumber || getId(order).slice(-8)}</h1>
           <p className="text-base text-zinc-400">Placed on {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <StatusBadge label="Order" status={order.orderStatus || 'pending_payment'} styles={ORDER_STATUS_STYLES} />
@@ -81,9 +97,9 @@ export default function OrderDetails() {
         </div>
 
         <div className="flex w-full flex-col gap-4 lg:w-auto lg:min-w-80">
-          <div className="flex flex-wrap justify-start gap-3 lg:justify-end">
-            {order.orderStatus === 'pending_payment' ? <button onClick={cancel} className="bg-zinc-900 text-white font-black uppercase py-3 px-6 rounded-full border border-zinc-700 hover:border-primary hover:text-primary transition-all flex items-center gap-2 cursor-pointer"><XCircle size={18} />Cancel</button> : null}
-            {order.paymentStatus === 'pending' || order.paymentStatus === 'rejected' ? <button onClick={() => navigate(`/payment/${getId(order)}`)} className="bg-primary text-white font-black uppercase py-3 px-6 rounded-full hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all flex items-center gap-2 cursor-pointer"><Upload size={18} />Upload Receipt</button> : null}
+          <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:justify-start lg:justify-end">
+            {order.orderStatus === 'pending_payment' ? <button onClick={cancel} className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-zinc-700 bg-zinc-900 px-6 py-3 font-black uppercase text-white transition-all hover:border-primary hover:text-primary sm:w-auto"><XCircle size={18} />Cancel</button> : null}
+            {order.paymentStatus === 'pending' || order.paymentStatus === 'rejected' ? <button onClick={() => navigate(`/payment/${getId(order)}`)} className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-black uppercase text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-hover sm:w-auto"><Upload size={18} />Upload Receipt</button> : null}
             {/* {order.paymentStatus === 'awaiting_review' ? <div className="flex items-center gap-2 rounded-full border border-sky-700/60 bg-sky-950 px-4 py-2 font-black uppercase text-sky-200"><Loader size={12} />Processing</div> : null}
             {order.orderStatus === 'cancelled' ? <div className="flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900 px-4 py-2 font-black uppercase text-zinc-300"><XCircle size={12} />Canceled</div> : null}
             {order.paymentStatus === 'paid' ? <div className="flex items-center gap-2 rounded-full border border-emerald-700/60 bg-emerald-950 px-4 py-2 font-black uppercase text-emerald-200"><CheckCircle size={12} />Paid</div> : null} */}
@@ -152,14 +168,21 @@ export default function OrderDetails() {
         </div>
 
         <div className="lg:col-span-4 space-y-8">
-          <section className="bg-zinc-950 p-8 border border-zinc-800">
+          <section className="bg-zinc-950 p-5 sm:p-8 border border-zinc-800">
             <h2 className="text-2xl font-black text-white uppercase mb-8 border-b border-zinc-800 pb-6 tracking-tight">Summary</h2>
-            <SummaryRow label="Subtotal" value={order.subtotal} />
-            <SummaryRow label="Shipping" value={order.shippingFee} />
-            <SummaryRow label="Discount" value={-(order.discount || 0)} />
-            <div className="flex justify-between items-baseline mt-8 pt-8 border-t border-zinc-800">
-              <span className="text-lg font-black text-white uppercase">Total</span>
-              <span className="text-3xl font-black text-white">{formatPrice(order.total)}</span>
+            <div className="space-y-4">
+              <SummaryRow label="Subtotal" value={order.subtotal} />
+              <SummaryRow label="Shipping" value={order.shippingFee} />
+              <SummaryRow label="Discount" value={-(order.discount || 0)} />
+            </div>
+            <div className="mt-8 rounded-xl border border-primary/40 bg-gradient-to-br from-primary/15 via-zinc-950 to-black p-5 shadow-xl shadow-primary/10">
+              <div className="flex flex-col gap-3">
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-primary">Order Total</span>
+                  <p className="mt-1 text-xs font-medium text-zinc-500">Includes shipping and applied discounts.</p>
+                </div>
+                <span className="break-words text-3xl font-black leading-none text-white">{formatPrice(order.total)}</span>
+              </div>
             </div>
           </section>
 
@@ -173,9 +196,21 @@ export default function OrderDetails() {
             </div>
           </section>
 
-          <section className="bg-zinc-950 p-8 border border-zinc-800">
+          <section className="bg-zinc-950 p-5 sm:p-8 border border-zinc-800">
             <div className="flex items-center gap-3 mb-6"><CreditCard className="text-primary w-5 h-5" /><h3 className="font-black text-white uppercase text-sm tracking-widest">Payment Method</h3></div>
-            <span className="bg-zinc-900 px-4 py-2 border border-zinc-800 text-xs font-black uppercase text-white tracking-widest rounded-sm">{order.paymentMethod?.replace('_', ' ') || 'N/A'}</span>
+            <div className="rounded-xl border border-zinc-800 bg-black p-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                {paymentMethod.image ? (
+                  <span className="flex h-12 w-16 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white p-3 shadow-lg shadow-black/20 ring-1 ring-black/5">
+                    <img src={paymentMethod.image} alt={paymentMethod.label} className="max-h-full max-w-full object-contain" />
+                  </span>
+                ) : null}
+                <div className="min-w-0">
+                  <p className="font-black uppercase tracking-widest text-white">{paymentMethod.label}</p>
+                  <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-500">{paymentMethod.detail}</p>
+                </div>
+              </div>
+            </div>
           </section>
         </div>
       </div>
@@ -219,11 +254,21 @@ function getPaymentRejectionReason(order: { rejectionReason?: string; payment?: 
   return '';
 }
 
+function getPaymentMethodMeta(method?: string) {
+  if (method && PAYMENT_METHODS[method]) return PAYMENT_METHODS[method];
+
+  return {
+    label: method?.replace(/_/g, ' ') || 'N/A',
+    image: '',
+    detail: 'Payment method',
+  };
+}
+
 function SummaryRow({ label, value }: { label: string; value?: number }) {
   return (
-    <div className="mb-4 flex justify-between items-center text-sm">
+    <div className="flex justify-between gap-4 text-sm">
       <span className="text-zinc-400 font-medium">{label}</span>
-      <span className="text-white font-bold">{formatPrice(value)}</span>
+      <span className="text-right text-white font-bold">{formatPrice(value)}</span>
     </div>
   );
 }
