@@ -41,6 +41,7 @@ export default function Checkout() {
   const [address, setAddress] = useState<Address>(emptyAddress);
   const [couponCode, setCouponCode] = useState('');
   const [notes, setNotes] = useState('');
+  const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
   const items = cartItems(cart);
   const subtotal = cartSubtotal(cart);
   const selectedShippingCity = cities.find((city) => normalizeCity(city.name) === normalizeCity(address.city));
@@ -84,20 +85,32 @@ export default function Checkout() {
     clearCoupon();
   };
 
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
+  const canSubmitOrder = () => {
     if (!items.length) {
       notify('Your cart is empty.', 'error');
-      return;
+      return false;
     }
     if (!address.fullName || !address.phone || !address.city || !address.area || !address.street) {
       notify('Please complete your shipping details.', 'error');
-      return;
+      return false;
     }
     if (cities.length > 0 && !selectedShippingCity) {
       notify('Please choose an available shipping city.', 'error');
-      return;
+      return false;
     }
+
+    return true;
+  };
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    if (!canSubmitOrder()) return;
+    setIsPolicyModalOpen(true);
+  };
+
+  const placeOrder = async () => {
+    if (!canSubmitOrder()) return;
+
     try {
       const order = await createOrder({
         shippingDetails: address,
@@ -106,6 +119,7 @@ export default function Checkout() {
         notes: notes || undefined,
       });
       await fetchCart().catch(() => undefined);
+      setIsPolicyModalOpen(false);
       notify('Order created. Continue with payment proof.', 'success');
       navigate(`/payment/${order._id || order.id}`);
     } catch (error) {
@@ -118,6 +132,7 @@ export default function Checkout() {
   }
 
   return (
+    <>
     <form onSubmit={submit} className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-24 flex flex-col lg:flex-row gap-16 items-start">
       <div className="w-full lg:flex-1 flex flex-col gap-12">
         <section className="flex flex-col gap-8">
@@ -278,6 +293,64 @@ export default function Checkout() {
         </div>
       </aside>
     </form>
+
+    {isPolicyModalOpen ? (
+      <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 p-4" role="dialog" aria-modal="true" aria-labelledby="checkout-policy-title">
+        <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-zinc-800 bg-zinc-950 p-5 shadow-2xl shadow-black sm:p-8">
+          <h2 id="checkout-policy-title" className="text-2xl font-black uppercase text-white">Shipping & Returns Policy</h2>
+          <p className="mt-3 text-sm leading-6 text-zinc-400">
+            Please review and approve our shipping and returns policy before placing your order.
+          </p>
+
+          <div className="mt-6 grid grid-cols-1 gap-4">
+            <div className="border border-zinc-800 bg-black p-5">
+              <h3 className="text-sm font-black uppercase tracking-widest text-primary">Delivery Inside Egypt</h3>
+              <p className="mt-2 text-sm leading-6 text-zinc-400">
+                Orders are delivered through local shipping companies across Egypt. Delivery fees are calculated at checkout based on your selected city.
+              </p>
+            </div>
+            <div className="border border-zinc-800 bg-black p-5">
+              <h3 className="text-sm font-black uppercase tracking-widest text-primary">Delivery Timing</h3>
+              <p className="mt-2 text-sm leading-6 text-zinc-400">
+                Cairo and Giza orders usually arrive within 1-3 business days. Other governorates usually arrive within 2-5 business days, depending on courier coverage and location.
+              </p>
+            </div>
+            <div className="border border-zinc-800 bg-black p-5">
+              <h3 className="text-sm font-black uppercase tracking-widest text-primary">Returns</h3>
+              <p className="mt-2 text-sm leading-6 text-zinc-400">
+                Returns are accepted within 14 days of receiving the order, provided the item is in the same condition, unused, unopened, and with its original packaging. Return delivery fees may apply.
+              </p>
+            </div>
+            <div className="border border-primary/40 bg-primary/10 p-5">
+              <h3 className="text-sm font-black uppercase tracking-widest text-white">Payment Deposit</h3>
+              <p className="mt-2 text-sm leading-6 text-zinc-300">
+                After creating the order, you will upload payment proof for at least 10% of the order total. Minimum due now: <strong className="text-white">{formatPrice(depositAmount)}</strong>.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => setIsPolicyModalOpen(false)}
+              className="rounded-full border border-zinc-700 px-6 py-3 text-xs font-black uppercase tracking-widest text-white transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={loading}
+              onClick={placeOrder}
+              className="rounded-full bg-primary px-6 py-3 text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loading ? 'Creating...' : 'Approve & Create Order'}
+            </button>
+          </div>
+        </div>
+      </div>
+    ) : null}
+    </>
   );
 }
 
