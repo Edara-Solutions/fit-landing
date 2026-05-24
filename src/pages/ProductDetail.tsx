@@ -87,9 +87,8 @@ export default function ProductDetail() {
   const nutritionFacts = product.nutritionFacts ? Object.entries(product.nutritionFacts).filter(([, value]) => value !== null && value !== undefined && value !== '') : [];
   const usageInstructions = productTextList(product.usageInstructions);
   const warnings = productTextList(product.warnings);
-  const productWeight = formatProductWeight(product.weight);
-  const productServings = formatProductServings(product.servings);
-  console.log(productWeight, product);
+  const productWeight = product.isStack ? '' : formatProductWeight(product.weight);
+  const productServings = product.isStack ? '' : formatProductServings(product.servings);
 
   return (
     <main className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-24">

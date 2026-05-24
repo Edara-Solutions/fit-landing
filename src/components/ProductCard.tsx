@@ -24,6 +24,7 @@ export default function ProductCard({
   const navigate = useNavigate();
   const soldOut = isSoldOut(product);
   const originalPrice = productOriginalPrice(product);
+  const servings = product.isStack ? '' : formatProductServings(product.servings);
   const [quantity, setQuantity] = useState(1);
   const [selectedFlavor, setSelectedFlavor] = useState(product.flavors?.[0] || '');
 
@@ -65,6 +66,11 @@ export default function ProductCard({
         <h3 className="text-lg font-black text-white uppercase tracking-tight line-clamp-2">
           {product.name || 'Unnamed product'}
         </h3>
+        {servings ? (
+          <span className="inline-flex w-fit items-center rounded-full border border-zinc-800 bg-black px-3 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+            {servings}
+          </span>
+        ) : null}
         <div className="flex items-center gap-3 mt-auto">
           <span className="text-xl font-black text-primary">{formatPrice(productPrice(product))}</span>
           {originalPrice ? <span className="text-sm font-bold text-zinc-600 line-through" style={{ fontSize: '12px' }}>{formatPrice(originalPrice)}</span> : null}
@@ -144,4 +150,10 @@ export default function ProductCard({
       </div>
     </motion.article>
   );
+}
+
+function formatProductServings(servings?: number | number[]) {
+  if (typeof servings === 'number') return `${servings} servings`;
+  if (!servings?.length) return '';
+  return servings.length === 1 ? `${servings[0]} servings` : servings.map((serving) => `${serving}`).join(' / ');
 }
