@@ -181,8 +181,8 @@ export default function Checkout() {
                       {isSelected ? <Check size={14} className="text-white" /> : null}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="flex h-14 w-full items-center rounded-lg border border-zinc-800 bg-white p-3">
-                        <img src={method.image} alt={method.label} className="max-h-full max-w-36 object-contain" />
+                      <span className="flex h-16 w-20 items-center justify-center rounded-xl border border-white/10 bg-white p-3 shadow-lg shadow-black/20 ring-1 ring-black/5">
+                        <img src={method.image} alt={method.label} className="max-h-full max-w-full object-contain" />
                       </span>
                       <span className="mt-4 block text-sm font-black uppercase tracking-widest text-white">{method.label}</span>
                       <span className="mt-1 block text-xs font-medium leading-5 text-zinc-500">{method.detail}</span>
@@ -220,32 +220,32 @@ export default function Checkout() {
         </section>
       </div>
 
-      <aside className="w-full lg:w-[450px] shrink-0 sticky top-32">
-        <div className="bg-zinc-950 border border-zinc-800 p-8 flex flex-col gap-8">
+      <aside className="w-full lg:w-[450px] shrink-0 lg:sticky lg:top-32">
+        <div className="bg-zinc-950 border border-zinc-800 p-5 sm:p-8 flex flex-col gap-8">
           <h3 className="text-xl font-black uppercase text-white border-b border-zinc-800 pb-4">Order Summary</h3>
           <div className="flex flex-col gap-6">
             {items.map((item) => (
-              <div key={item._id || item.id} className="flex gap-4">
-                <div className="w-20 h-20 bg-zinc-900 border border-zinc-800 relative shrink-0">
+              <div key={item._id || item.id} className="grid grid-cols-[72px_minmax(0,1fr)] gap-4 sm:grid-cols-[80px_minmax(0,1fr)_auto] sm:items-start">
+                <div className="relative h-18 w-18 shrink-0 bg-zinc-900 border border-zinc-800 sm:h-20 sm:w-20">
                   <img src={productImage(item.product)} alt={item.product?.name || 'Product'} className="w-full h-full object-contain p-2 grayscale" />
                   <div className="absolute -top-2 -right-2 w-6 h-6 bg-zinc-800 rounded-full flex items-center justify-center text-[10px] font-bold text-white border border-zinc-700">{item.quantity || 1}</div>
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-bold uppercase text-white text-sm">{item.product?.name || 'Product'}</h4>
+                <div className="min-w-0">
+                  <h4 className="break-words font-bold uppercase text-white text-sm leading-5">{item.product?.name || 'Product'}</h4>
                   {item.selectedFlavor ? <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1">{item.selectedFlavor}</p> : null}
                 </div>
-                <span className="font-bold text-zinc-100">{formatPrice(productPrice(item.product) * Number(item.quantity || 1))}</span>
+                <span className="col-start-2 font-bold text-zinc-100 sm:col-start-auto sm:text-right">{formatPrice(productPrice(item.product) * Number(item.quantity || 1))}</span>
               </div>
             ))}
           </div>
 
-          <div className="flex gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
             <input
               value={couponCode}
               onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
               placeholder="Discount code"
               disabled={isCouponVerified}
-              className="flex-1 bg-zinc-900 border border-zinc-800 p-3 uppercase text-xs font-bold tracking-widest disabled:cursor-not-allowed disabled:opacity-60"
+              className="min-w-0 bg-zinc-900 border border-zinc-800 p-3 uppercase text-xs font-bold tracking-widest disabled:cursor-not-allowed disabled:opacity-60"
             />
             {isCouponVerified ? (
               <button type="button" onClick={resetCoupon} className="cursor-pointer bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 uppercase font-bold text-xs transition-colors">Clear</button>
@@ -254,15 +254,20 @@ export default function Checkout() {
             )}
           </div>
 
-          <div className="space-y-3 pt-6 border-t border-zinc-800">
+          <div className="space-y-4 pt-6 border-t border-zinc-800">
             <SummaryRow label="Subtotal" value={subtotal} />
             <SummaryRow label="Shipping" value={shippingFee} />
             {discount ? <SummaryRow label="Discount" value={-discount} /> : null}
           </div>
 
-          <div className="flex justify-between items-baseline pt-6 border-t border-zinc-800">
-            <span className="text-xl font-black uppercase text-white">Total</span>
-            <span className="text-3xl font-black text-white">{formatPrice(total)}</span>
+          <div className="rounded-xl border border-primary/40 bg-gradient-to-br from-primary/15 via-zinc-950 to-black p-5 shadow-xl shadow-primary/10">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-primary">Order Total</span>
+                <p className="mt-1 text-xs font-medium text-zinc-500">Includes shipping and applied discounts.</p>
+              </div>
+              <span className="break-words text-3xl font-black leading-none text-white sm:text-right">{formatPrice(total)}</span>
+            </div>
           </div>
 
           <motion.button type="submit" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} disabled={loading} className="cursor-pointer w-full bg-primary text-white font-black uppercase py-6 rounded-full tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:bg-primary-hover transition-all disabled:opacity-60">
