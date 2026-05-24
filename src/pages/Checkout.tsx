@@ -1,8 +1,10 @@
-import { Lock, Check, ChevronDown } from 'lucide-react';
+import { Lock, Check, ChevronDown, BadgePercent, ShieldCheck } from 'lucide-react';
 import { motion } from 'motion/react';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EmptyState } from '../components/AsyncState';
+import instapayLogo from '../assets/images/instapay.png';
+import vodafoneCashLogo from '../assets/images/vodafonecash.jpg';
 import { cartItems, cartSubtotal, formatPrice, getId, productImage, productPrice } from '../lib/format';
 import { useToast } from '../lib/toast';
 import { useAuthStore } from '../stores/auth.store';
@@ -13,6 +15,20 @@ import { Address } from '../types';
 
 const emptyAddress: Address = { fullName: '', phone: '', city: '', area: '', street: '', buildingNumber: '', apartmentNumber: '', notes: '' };
 const normalizeCity = (value?: string) => value?.trim().toLowerCase() || '';
+const PAYMENT_METHODS = [
+  {
+    value: 'vodafone_cash',
+    label: 'Vodafone Cash',
+    image: vodafoneCashLogo,
+    detail: 'Pay from any Vodafone Cash wallet.',
+  },
+  {
+    value: 'instapay',
+    label: 'InstaPay',
+    image: instapayLogo,
+    detail: 'Transfer instantly through InstaPay.',
+  },
+] as const;
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -30,6 +46,7 @@ export default function Checkout() {
   const selectedShippingCity = cities.find((city) => normalizeCity(city.name) === normalizeCity(address.city));
   const shippingFee = freeShipping || subtotal <= 0 ? 0 : selectedShippingCity?.shippingFee || 0;
   const total = Math.max(0, subtotal + shippingFee - discount);
+  const depositAmount = total * 0.1;
   const isCouponVerified = Boolean(couponCode.trim() && coupon);
 
   const addresses = useMemo(() => customer?.addresses || [], [customer?.addresses]);
@@ -142,14 +159,63 @@ export default function Checkout() {
         <section className="flex flex-col gap-8">
           <div>
             <h2 className="text-3xl font-black uppercase text-white tracking-tight">Payment</h2>
-            <p className="text-zinc-500 text-sm mt-1">Choose one of the supported manual payment methods.</p>
+            <p className="text-zinc-500 text-sm mt-1">Choose one manual payment method. You will pay a 10% minimum deposit after creating the order.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {(['vodafone_cash', 'instapay'] as const).map((method) => (
-              <button key={method} type="button" onClick={() => setPaymentMethod(method)} className={`cursor-pointer rounded-lg border p-5 text-left uppercase font-black ${paymentMethod === method ? 'border-primary bg-primary/10 text-white' : 'border-zinc-800 bg-zinc-950 text-zinc-400'}`}>
-                <span className="flex items-center gap-3"><span className={`h-5 w-5 rounded-full border-2 ${paymentMethod === method ? 'border-primary bg-primary' : 'border-zinc-700'}`} />{method.replace('_', ' ')}</span>
-              </button>
-            ))}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {PAYMENT_METHODS.map((method) => {
+              const isSelected = paymentMethod === method.value;
+
+              return (
+                <button
+                  key={method.value}
+                  type="button"
+                  onClick={() => setPaymentMethod(method.value)}
+                  className={`group cursor-pointer rounded-xl border p-5 text-left transition-all ${
+                    isSelected
+                      ? 'border-primary bg-primary/10 shadow-xl shadow-primary/10'
+                      : 'border-zinc-800 bg-zinc-950 hover:border-zinc-600'
+                  }`}
+                >
+                  <span className="flex items-start gap-4">
+                    <span className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${isSelected ? 'border-primary bg-primary' : 'border-zinc-700 bg-black'}`}>
+                      {isSelected ? <Check size={14} className="text-white" /> : null}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex h-14 w-full items-center rounded-lg border border-zinc-800 bg-white p-3">
+                        <img src={method.image} alt={method.label} className="max-h-full max-w-36 object-contain" />
+                      </span>
+                      <span className="mt-4 block text-sm font-black uppercase tracking-widest text-white">{method.label}</span>
+                      <span className="mt-1 block text-xs font-medium leading-5 text-zinc-500">{method.detail}</span>
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="overflow-hidden border border-primary/40 bg-gradient-to-br from-primary/15 via-zinc-950 to-emerald-950/30 p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-4">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-primary/50 bg-black text-primary">
+                  <BadgePercent size={22} />
+                </span>
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-primary">Required deposit</p>
+                  <h3 className="mt-1 text-lg font-black uppercase text-white">Pay 10% now to confirm review</h3>
+                  <p className="mt-1 text-sm leading-6 text-zinc-400">
+                    After creating the order, upload proof for at least 10% of the total. The remaining balance can be handled after review.
+                  </p>
+                </div>
+              </div>
+              <div className="shrink-0 border border-white/10 bg-black/60 p-4 text-left sm:text-right">
+                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Minimum due</span>
+                <strong className="mt-1 block text-2xl font-black text-white">{formatPrice(depositAmount)}</strong>
+                <span className="mt-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-emerald-300 sm:justify-end">
+                  <ShieldCheck size={13} />
+                  10% of {formatPrice(total)}
+                </span>
+              </div>
+            </div>
           </div>
         </section>
       </div>
