@@ -74,14 +74,29 @@ export default function Navbar() {
           </Link>
         </div>
 
-        <button 
-          className="md:hidden text-white p-2 hover:text-primary transition-colors cursor-pointer"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={isMenuOpen}
-        >
-          {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        <div className="flex items-center gap-3 md:hidden">
+          <Link
+            to="/cart"
+            onClick={() => setIsMenuOpen(false)}
+            aria-label="Cart"
+            className="relative flex h-11 w-11 items-center justify-center rounded-full border border-zinc-800 bg-zinc-950 text-white transition-colors hover:border-primary hover:text-primary"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            {cartCount > 0 && (
+              <span className="absolute -right-1 -top-1 min-w-5 h-5 rounded-full bg-primary px-1 text-center text-[10px] font-black leading-5 text-white">
+                {cartCount}
+              </span>
+            )}
+          </Link>
+          <button
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-zinc-800 bg-zinc-950 text-white transition-colors hover:border-primary hover:text-primary cursor-pointer"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMenuOpen}
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -123,14 +138,6 @@ export default function Navbar() {
                   Logout
                 </button>
               )}
-              <Link
-                to="/cart"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-3 text-lg font-bold text-white uppercase tracking-tighter hover:text-primary transition-colors"
-              >
-                <ShoppingCart className="w-5 h-5" />
-                Cart {cartCount ? `(${cartCount})` : ''}
-              </Link>
             </div>
           </motion.div>
         )}
