@@ -54,25 +54,25 @@ export default function Payment() {
         {loading && !paymentInstructions ? <GlobalLoader label="Loading payment instructions" className="min-h-48" /> : (
           <div className="space-y-6">
             {depositAmount ? (
-              <div className="relative overflow-hidden border border-primary/50 bg-gradient-to-br from-primary/20 via-zinc-950 to-emerald-950/30 p-6 shadow-2xl shadow-primary/10">
+              <div className="relative overflow-hidden border border-primary/50 bg-gradient-to-br from-primary/20 via-zinc-950 to-emerald-950/30 p-5 shadow-2xl shadow-primary/10 sm:p-6">
                 <div className="absolute right-0 top-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full bg-primary/20 blur-2xl" />
-                <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-start gap-4">
-                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-primary/50 bg-black text-primary">
-                      <BadgePercent size={24} />
+                <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-primary/50 bg-black text-primary sm:h-14 sm:w-14">
+                      <BadgePercent size={22} />
                     </span>
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.25em] text-primary">Required deposit</p>
-                      <h2 className="mt-2 text-2xl font-black uppercase text-white md:text-3xl">Pay 10% per minimum to confirm your order</h2>
-                      <p className="mt-2 max-w-xl text-sm font-medium leading-6 text-zinc-300">
-                        Please send 10% per minimum of the exact order amount now. Your order will be confirmed after we review the payment proof.
+                      <h2 className="mt-2 max-w-xl text-2xl font-black uppercase leading-tight text-white sm:text-3xl">Pay 10% minimum to confirm your order</h2>
+                      <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-zinc-300">
+                        Send at least 10% of the order amount now. Your order will be confirmed after we review the payment proof.
                       </p>
                     </div>
                   </div>
-                  <div className="shrink-0 border border-white/10 bg-black/60 p-5 text-left md:text-right">
+                  <div className="shrink-0 border border-white/10 bg-black/60 p-5 text-left lg:text-right">
                     <span className="text-xs font-black uppercase tracking-widest text-zinc-500">Send now</span>
-                    <strong className="mt-1 block text-3xl font-black text-white">{formatPrice(depositAmount)}</strong>
-                    <span className="mt-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-300 md:justify-end">
+                    <span className="mt-1 block break-words text-3xl font-black leading-none text-white sm:text-lg lg:text-3xl">{formatPrice(depositAmount)}</span>
+                    <span className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-300 lg:justify-end">
                       <ShieldCheck size={14} />
                       10% of {formatPrice(exactAmount)}
                     </span>
