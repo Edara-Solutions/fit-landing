@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { FlaskConical, ShieldCheck, CheckCircle, Bolt } from 'lucide-react';
+import musleman from '../assets/images/muscular.png';
 
 export default function About() {
   return (
@@ -8,7 +9,7 @@ export default function About() {
       <header className="relative w-full min-h-[70vh] flex items-center justify-center overflow-hidden bg-black">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNg4NumU35I2AJDvhgumwfdYjsEnXqK-seesXMCk1-pdgN-fAmsKYjpYscyHoYqsBFRhMmSPO0uPXUR3Zvk9ym3K8-Y39cRQWu0PdkGZPSdIKD0hWM6cbg8h1LyeSQQUrvJZTsMDYv3E9gKtmvsC29EgSriZvay5VI6Hr-DvzFzp6PU9GAKJ4gLVLOQ676GKbDBn_83y8eDmS_MGA6TEAHaSJuIRBccdZIRVmUPEakHWDuQHXvexrIb5XkvxPXQMkiScxYXYjBVSg" 
+            src={musleman}
             alt="Built to Perform Hero" 
             className="w-full h-full object-cover opacity-40 grayscale" 
           />
