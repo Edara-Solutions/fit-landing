@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 const FOOTER_LINKS = [
   { name: 'Shipping & Returns', href: '/shipping' },
   { name: 'Privacy Policy', href: '/legal#privacy' },
-  { name: 'Terms of Service', href: '/legal#terms' },
-  { name: 'Affiliate Program', href: '/affiliate' },
-  { name: 'Contact', href: '/contact' },
+  // { name: 'Terms of Service', href: '/legal#terms' },
+  // { name: 'Affiliate Program', href: '/affiliate' },
+  // { name: 'Contact', href: '/contact' },
 ];
 
 export default function Footer() {
@@ -29,7 +29,7 @@ export default function Footer() {
         </div>
 
         <div className="text-[10px] text-zinc-600 font-light uppercase tracking-[0.2em] text-center">
-          © {new Date().getFullYear()} FIT NUTRITION. BUILT TO PERFORM.
+          © {new Date().getFullYear()} FIT SUPPLEMENT. BUILT TO PERFORM.
         </div>
       </div>
     </footer>
