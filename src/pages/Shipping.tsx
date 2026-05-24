@@ -9,7 +9,7 @@ export default function Shipping() {
           Shipping & Returns
         </h1>
         <p className="text-lg md:text-xl text-zinc-400 max-w-2xl">
-          Everything you need to know about getting your gear and what to do if it's not quite right. We stand by our performance.
+          Everything you need to know about delivery inside Egypt and how returns work when an item is not quite right.
         </p>
       </div>
 
@@ -21,16 +21,16 @@ export default function Shipping() {
           </div>
           <div className="space-y-6">
             <div className="p-8 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-colors">
-              <h3 className="font-black text-white uppercase tracking-widest mb-2">Standard Shipping</h3>
-              <p className="text-zinc-400 text-sm">3-5 business days. Free on orders over $100.</p>
+              <h3 className="font-black text-white uppercase tracking-widest mb-2">Delivery Inside Egypt</h3>
+              <p className="text-zinc-400 text-sm">Orders are delivered through local shipping companies across Egypt. Delivery fees are calculated at checkout based on your selected city.</p>
             </div>
             <div className="p-8 bg-zinc-900 border-l-4 border-primary">
-              <h3 className="font-black text-primary uppercase tracking-widest mb-2">Express Shipping</h3>
-              <p className="text-zinc-300 text-sm">1-2 business days. Flat rate $15. Order before 2 PM EST for same-day processing.</p>
+              <h3 className="font-black text-primary uppercase tracking-widest mb-2">Estimated Timing</h3>
+              <p className="text-zinc-300 text-sm">Cairo and Giza orders usually arrive within 1-3 business days. Other governorates usually arrive within 2-5 business days, depending on the courier and location.</p>
             </div>
             <div className="p-8 bg-zinc-900/50 border border-zinc-800">
-              <h3 className="font-black text-white uppercase tracking-widest mb-2">International Shipping</h3>
-              <p className="text-zinc-400 text-sm">7-14 business days. Rates calculated at checkout based on destination.</p>
+              <h3 className="font-black text-white uppercase tracking-widest mb-2">No Free Delivery</h3>
+              <p className="text-zinc-400 text-sm">We currently do not offer free delivery. The shipping cost is shown before you create your order.</p>
             </div>
           </div>
         </section>
@@ -41,17 +41,17 @@ export default function Shipping() {
             <h2 className="text-3xl font-black uppercase text-white tracking-tight">Returns Policy</h2>
           </div>
           <p className="text-zinc-400 leading-relaxed">
-            We accept returns within 30 days of purchase for items in new, unused condition with original packaging.
+            Returns are accepted within 14 days of receiving the order, provided the item is in the same condition, unused, unopened, and with its original packaging.
           </p>
           <div className="space-y-8 mt-4">
-            <Step number="1" title="Initiate Return" text="Log into your account and select the items you wish to return from your order history." />
-            <Step number="2" title="Print Label" text="Download and print the prepaid return shipping label provided." />
-            <Step number="3" title="Ship It Back" text="Drop the package off at any authorized carrier location. Refunds process in 5-7 days." />
+            <Step number="1" title="Contact Support" text="Send us your order number, phone number, and the reason for return within 14 days of delivery." />
+            <Step number="2" title="Condition Check" text="The product must be in the same condition you received it: unused, unopened, and in its original packaging." />
+            <Step number="3" title="Courier Return" text="After approval, we will guide you through returning the package with the shipping company. Return delivery fees may apply." />
           </div>
         </section>
       </div>
 
-      <div className="mt-20 bg-zinc-950 border border-zinc-800 p-12 flex flex-col md:flex-row items-center justify-between gap-10">
+      {/* <div className="mt-20 bg-zinc-950 border border-zinc-800 p-12 flex flex-col md:flex-row items-center justify-between gap-10">
         <div>
           <h2 className="text-3xl font-black text-white uppercase mb-2 tracking-tight">Track Your Order</h2>
           <p className="text-zinc-400">Enter your order number and email to see live tracking updates.</p>
@@ -62,7 +62,7 @@ export default function Shipping() {
             Track Now
           </button>
         </form>
-      </div>
+      </div> */}
     </div>
   );
 }
