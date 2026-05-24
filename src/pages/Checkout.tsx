@@ -1,4 +1,4 @@
-import { Lock, Check } from 'lucide-react';
+import { Lock, Check, ChevronDown } from 'lucide-react';
 import { motion } from 'motion/react';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -106,25 +106,31 @@ export default function Checkout() {
         <section className="flex flex-col gap-8">
           <h2 className="text-3xl font-black uppercase text-white tracking-tight">Delivery</h2>
           {addresses.length ? (
-            <select
-              value={addressId}
-              onChange={(event) => {
-                const next = addresses.find((item) => getId(item) === event.target.value);
-                setAddressId(event.target.value);
-                if (next) setAddress(next);
-              }}
-              className="bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary"
-            >
-              {addresses.map((item) => <option key={getId(item)} value={getId(item)}>{item.fullName} - {item.city}, {item.area}</option>)}
-            </select>
+            <div className="relative">
+              <select
+                value={addressId}
+                onChange={(event) => {
+                  const next = addresses.find((item) => getId(item) === event.target.value);
+                  setAddressId(event.target.value);
+                  if (next) setAddress(next);
+                }}
+                className="w-full appearance-none bg-zinc-950 border border-zinc-800 py-4 pl-4 pr-12 text-white outline-none focus:border-primary"
+              >
+                {addresses.map((item) => <option key={getId(item)} value={getId(item)}>{item.fullName} - {item.city}, {item.area}</option>)}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
+            </div>
           ) : null}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input value={address.fullName || ''} onChange={(event) => updateAddress('fullName', event.target.value)} placeholder="Full name" className="bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary" />
             <input value={address.phone || ''} onChange={(event) => updateAddress('phone', event.target.value)} placeholder="Phone" className="bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary" />
-            <select value={address.city || ''} onChange={(event) => updateAddress('city', event.target.value)} className="bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary">
-              <option value="">Choose city</option>
-              {cities.map((city) => <option key={city.name} value={city.name}>{city.name}</option>)}
-            </select>
+            <div className="relative">
+              <select value={address.city || ''} onChange={(event) => updateAddress('city', event.target.value)} className="w-full appearance-none bg-zinc-950 border border-zinc-800 py-4 pl-4 pr-12 text-white outline-none focus:border-primary">
+                <option value="">Choose city</option>
+                {cities.map((city) => <option key={city.name} value={city.name}>{city.name}</option>)}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
+            </div>
             <input value={address.area || ''} onChange={(event) => updateAddress('area', event.target.value)} placeholder="Area" className="bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary" />
             <input value={address.street || ''} onChange={(event) => updateAddress('street', event.target.value)} placeholder="Street" className="col-span-full bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary" />
             <input value={address.buildingNumber || ''} onChange={(event) => updateAddress('buildingNumber', event.target.value)} placeholder="Building number" className="bg-zinc-950 border border-zinc-800 p-4 text-white focus:border-primary" />

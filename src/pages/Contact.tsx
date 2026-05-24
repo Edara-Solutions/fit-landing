@@ -50,12 +50,15 @@ export default function Contact() {
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Inquiry Type</label>
-                <select className="bg-black border border-zinc-800 text-white p-4 focus:border-primary outline-none transition-all appearance-none uppercase text-xs font-bold tracking-widest">
-                  <option>Order Support</option>
-                  <option>Wholesale / Distribution</option>
-                  <option>Athlete Sponsorship</option>
-                  <option>General Transmission</option>
-                </select>
+                <div className="relative">
+                  <select className="w-full appearance-none bg-black border border-zinc-800 text-white py-4 pl-4 pr-12 focus:border-primary outline-none transition-all uppercase text-xs font-bold tracking-widest">
+                    <option>Order Support</option>
+                    <option>Wholesale / Distribution</option>
+                    <option>Athlete Sponsorship</option>
+                    <option>General Transmission</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
+                </div>
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Message</label>

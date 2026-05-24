@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { EmptyState } from '../components/AsyncState';
 import { getId } from '../lib/format';
 import { useToast } from '../lib/toast';
@@ -201,10 +202,13 @@ export default function Account() {
           <form onSubmit={requestSaveAddress} className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <input value={address.fullName || ''} onChange={(event) => setAddress({ ...address, fullName: event.target.value })} placeholder="Full name" className="bg-zinc-900 border border-zinc-800 p-4 text-white" />
             <input value={address.phone || ''} onChange={(event) => setAddress({ ...address, phone: event.target.value })} placeholder="Phone" className="bg-zinc-900 border border-zinc-800 p-4 text-white" />
-            <select value={address.city || ''} onChange={(event) => setAddress({ ...address, city: event.target.value })} className="bg-zinc-900 border border-zinc-800 p-4 text-white">
-              <option value="">Choose city</option>
-              {cities.map((city) => <option key={city.name} value={city.name}>{city.name}</option>)}
-            </select>
+            <div className="relative">
+              <select value={address.city || ''} onChange={(event) => setAddress({ ...address, city: event.target.value })} className="w-full appearance-none bg-zinc-900 border border-zinc-800 py-4 pl-4 pr-12 text-white outline-none focus:border-primary">
+                <option value="">Choose city</option>
+                {cities.map((city) => <option key={city.name} value={city.name}>{city.name}</option>)}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
+            </div>
             <input value={address.area || ''} onChange={(event) => setAddress({ ...address, area: event.target.value })} placeholder="Area" className="bg-zinc-900 border border-zinc-800 p-4 text-white" />
             <input value={address.street || ''} onChange={(event) => setAddress({ ...address, street: event.target.value })} placeholder="Street" className="md:col-span-2 bg-zinc-900 border border-zinc-800 p-4 text-white" />
             <input value={address.buildingNumber || ''} onChange={(event) => setAddress({ ...address, buildingNumber: event.target.value })} placeholder="Building number" className="bg-zinc-900 border border-zinc-800 p-4 text-white" />

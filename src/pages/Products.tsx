@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react';
 import { EmptyState, LoadingGrid } from '../components/AsyncState';
 import ProductCard, { AddProductPayload } from '../components/ProductCard';
 import { formatPrice, getId, getName } from '../lib/format';
@@ -243,13 +243,16 @@ function FilterSelect({
   return (
     <label className="group flex flex-col gap-2">
       <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-focus-within:text-primary">{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="h-12 rounded-full border border-zinc-800 bg-black px-4 text-sm font-bold text-white outline-none transition-all hover:border-zinc-600 focus:border-primary focus:ring-2 focus:ring-primary/20"
-      >
-        {children}
-      </select>
+      <span className="relative">
+        <select
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="h-12 w-full appearance-none rounded-full border border-zinc-800 bg-black pl-4 pr-12 text-sm font-bold text-white outline-none transition-all hover:border-zinc-600 focus:border-primary focus:ring-2 focus:ring-primary/20"
+        >
+          {children}
+        </select>
+        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
+      </span>
     </label>
   );
 }

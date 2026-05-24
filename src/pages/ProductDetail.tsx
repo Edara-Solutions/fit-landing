@@ -230,9 +230,12 @@ export default function ProductDetail() {
           </div>
           <div className="border border-zinc-800 bg-zinc-950 p-6">
             <h3 className="text-lg font-black uppercase text-white mb-4">Write a Review</h3>
-            <select value={reviewRating} onChange={(event) => setReviewRating(Number(event.target.value))} className="mb-3 w-full border border-zinc-800 bg-zinc-900 p-3 text-white">
-              {[5, 4, 3, 2, 1].map((rating) => <option key={rating} value={rating}>{rating} stars</option>)}
-            </select>
+            <div className="relative mb-3">
+              <select value={reviewRating} onChange={(event) => setReviewRating(Number(event.target.value))} className="w-full appearance-none border border-zinc-800 bg-zinc-900 py-3 pl-3 pr-12 text-white outline-none focus:border-primary">
+                {[5, 4, 3, 2, 1].map((rating) => <option key={rating} value={rating}>{rating} stars</option>)}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
+            </div>
             <textarea value={reviewComment} onChange={(event) => setReviewComment(event.target.value)} placeholder="Your review" className="min-h-28 w-full border border-zinc-800 bg-zinc-900 p-3 text-white" />
             <button disabled={submittingReview} onClick={submitReview} className="mt-3 w-full rounded-full bg-primary py-3 font-black uppercase text-white disabled:opacity-60">Submit</button>
           </div>
