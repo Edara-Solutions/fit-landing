@@ -87,6 +87,9 @@ export default function ProductDetail() {
   const nutritionFacts = product.nutritionFacts ? Object.entries(product.nutritionFacts).filter(([, value]) => value !== null && value !== undefined && value !== '') : [];
   const usageInstructions = productTextList(product.usageInstructions);
   const warnings = productTextList(product.warnings);
+  const productWeight = formatProductWeight(product.weight);
+  const productServings = formatProductServings(product.servings);
+  console.log(productWeight, product);
 
   return (
     <main className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-24">
@@ -132,6 +135,16 @@ export default function ProductDetail() {
               ) : null}
             </div>
             <p className="text-zinc-300 text-lg leading-relaxed max-w-lg">{product.description || product.shortDescription || 'Product details coming soon.'}</p>
+            {productWeight || productServings ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {productWeight ? (
+                  <ProductFact label="Weight" value={productWeight} />
+                ) : null}
+                {productServings ? (
+                  <ProductFact label="Servings" value={productServings} />
+                ) : null}
+              </div>
+            ) : null}
             {typeof product.stock === 'number' ? <p className="text-sm font-bold uppercase text-zinc-500">Stock: {product.stock}</p> : null}
           </div>
 
@@ -160,7 +173,7 @@ export default function ProductDetail() {
                 {soldOut ? 'Out of Stock' : cartLoading ? 'Adding...' : 'Add to Cart'}
               </button>
             </div>
-            <div className="flex items-center justify-center gap-2 mt-6 text-emerald-500 text-sm font-medium"><Truck size={16} />Free shipping may apply at checkout</div>
+            <div className="flex items-center justify-center gap-2 mt-6 text-emerald-500 text-sm font-medium"><Truck size={16} />Shipping is calculated at checkout</div>
           </div>
 
           <div className="border-t border-zinc-800 mt-12">
@@ -254,4 +267,30 @@ export default function ProductDetail() {
       </section>
     </main>
   );
+}
+
+function ProductFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="group relative overflow-hidden rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-950 via-black to-zinc-950 p-5 transition-colors hover:border-primary/60">
+      <div className="absolute right-0 top-0 h-16 w-16 translate-x-6 -translate-y-6 rounded-full bg-primary/15 blur-2xl" />
+      <div className="relative flex items-center gap-4">
+        <span className="h-10 w-1 rounded-full bg-primary shadow-lg shadow-primary/30" />
+        <div className="min-w-0">
+          <span className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500 group-hover:text-primary">{label}</span>
+          <p className="mt-1 break-words text-2xl font-black uppercase leading-none text-white">{value}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function formatProductWeight(weight?: string | number) {
+  if (weight === undefined || weight === null || weight === '') return '';
+  return typeof weight === 'number' ? `${weight} g` : weight;
+}
+
+function formatProductServings(servings?: number | number[]) {
+  if (typeof servings === 'number') return `${servings} servings`;
+  if (!servings?.length) return '';
+  return servings.length === 1 ? `${servings[0]} servings` : servings.map((serving) => `${serving}`).join(' / ');
 }

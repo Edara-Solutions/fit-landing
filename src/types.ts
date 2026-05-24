@@ -54,7 +54,8 @@ export interface Product {
   status?: string;
   isSoldOut?: boolean;
   flavors?: string[];
-  servings?: number[];
+  weight?: string | number;
+  servings?: number | number[];
   ingredients?: { name?: string; amount?: string }[];
   nutritionFacts?: Record<string, string | number | boolean | null | undefined>;
   usageInstructions?: string | string[];
