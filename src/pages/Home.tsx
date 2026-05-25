@@ -20,7 +20,7 @@ const HOME_PRODUCT_FILTERS = {
   maxPrice: '',
   search: '',
   page: 1,
-  limit: 4,
+  limit: 12,
   sort: '-createdAt',
 };
 
