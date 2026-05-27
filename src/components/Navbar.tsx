@@ -20,6 +20,7 @@ export default function Navbar() {
   const { isAuthenticated, customer, logout } = useAuthStore();
   const cart = useCartStore((state) => state.cart);
   const cartCount = cartItems(cart).reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const navLinks = LINKS.filter((link) => link.name !== 'Orders' || isAuthenticated);
 
   return (
     <nav className="bg-black border-b border-zinc-900 sticky top-0 z-50">
@@ -29,7 +30,7 @@ export default function Navbar() {
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
-          {LINKS.map((link) => {
+          {navLinks.map((link) => {
             const isActive = location.pathname === link.href;
             return (
               <Link
@@ -108,7 +109,7 @@ export default function Navbar() {
             className="md:hidden bg-zinc-950 border-b border-zinc-900 overflow-hidden"
           >
             <div className="flex flex-col p-6 gap-4">
-              {LINKS.map((link) => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.href}
