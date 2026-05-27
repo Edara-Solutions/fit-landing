@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { useEffect } from 'react';
 import { EmptyState, LoadingGrid } from '../components/AsyncState';
 import ProductCard, { AddProductPayload } from '../components/ProductCard';
-import { getId, getName } from '../lib/format';
+import { getId } from '../lib/format';
 import { useToast } from '../lib/toast';
 import { useAuthStore } from '../stores/auth.store';
 import { useCartStore } from '../stores/cart.store';
@@ -29,13 +29,11 @@ export default function Home() {
   const { notify } = useToast();
   const { isAuthenticated } = useAuthStore();
   const { addItem } = useCartStore();
-  const { products, categories, brands, loading, error, fetchProducts, fetchCategories, fetchBrands } = useCatalogStore();
+  const { products, loading, error, fetchProducts } = useCatalogStore();
 
   useEffect(() => {
     fetchProducts(HOME_PRODUCT_FILTERS);
-    fetchCategories();
-    fetchBrands();
-  }, [fetchBrands, fetchCategories, fetchProducts]);
+  }, [fetchProducts]);
 
   const handleAdd = async ({ product, quantity, selectedFlavor }: AddProductPayload) => {
     if (!isAuthenticated) {
@@ -86,33 +84,6 @@ export default function Home() {
               </button>
             </div>
           </motion.div>
-        </div>
-      </section>
-
-      <section className="max-w-7xl mx-auto px-6 md:px-10 py-20 w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h2 className="text-2xl font-black uppercase text-white mb-4">Categories</h2>
-            <div className="flex flex-wrap gap-3">
-              {categories.slice(0, 8).map((category) => (
-                <button key={getId(category)} onClick={() => navigate(`/products?category=${getId(category)}`)} className="cursor-pointer border border-zinc-800 rounded-lg bg-zinc-950 px-5 py-3 text-sm font-black uppercase text-zinc-200 hover:border-primary hover:text-primary transition-colors duration-400">
-                  {getName(category)}
-                </button>
-              ))}
-              {!categories.length && <p className="text-zinc-500">No categories available yet.</p>}
-            </div>
-          </div>
-          <div>
-            <h2 className="text-2xl font-black uppercase text-white mb-4">Brands</h2>
-            <div className="flex flex-wrap gap-3">
-              {brands.slice(0, 8).map((brand) => (
-                <button key={getId(brand)} onClick={() => navigate(`/products?brand=${getId(brand)}`)} className="cursor-pointer border border-zinc-800 rounded-lg bg-zinc-950 px-5 py-3 text-sm font-black uppercase text-zinc-200 hover:border-primary hover:text-primary transition-colors duration-400">
-                  {getName(brand)}
-                </button>
-              ))}
-              {!brands.length && <p className="text-zinc-500">No brands available yet.</p>}
-            </div>
-          </div>
         </div>
       </section>
 
