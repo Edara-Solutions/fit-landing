@@ -1,6 +1,7 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Star, ShoppingCart, Truck, ChevronDown, Plus, Minus, ArrowRight, PlusCircle } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Star, ShoppingCart, Truck, ChevronDown, Plus, Minus, ArrowRight, ClipboardList, ShieldAlert, Utensils } from 'lucide-react';
 import { motion } from 'motion/react';
 import ProductCard from '../components/ProductCard';
 import { EmptyState } from '../components/AsyncState';
@@ -179,52 +180,45 @@ export default function ProductDetail() {
             <details className="group border-b border-zinc-800" open>
               <summary className="flex justify-between items-center font-black uppercase py-6 cursor-pointer list-none hover:text-primary transition-colors">Nutritional Facts<ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" /></summary>
               <div className="pb-8">
-                <div className="bg-zinc-900 p-8 border border-zinc-800">
-                  {nutritionFacts.length ? nutritionFacts.map(([key, value]) => (
-                    <div key={key} className="flex justify-between gap-6 border-b border-zinc-800 pb-2 mb-3">
-                      <span className="font-bold text-zinc-100 uppercase text-sm tracking-tight">{key.replace(/([A-Z])/g, ' $1')}</span>
-                      <span className="font-mono text-zinc-300 text-right">{String(value)}</span>
-                    </div>
-                  )) : <div className="text-zinc-500 italic">Nutritional information coming soon.</div>}
-                </div>
+                <ProductInfoSection
+                  icon={<Utensils size={18} />}
+                  eyebrow="Supplement facts"
+                  title="Nutritional Facts"
+                  body="Values are listed per serving when provided by the product label."
+                >
+                  <NutritionFactsTable facts={nutritionFacts} />
+                </ProductInfoSection>
               </div>
             </details>
 
-            {usageInstructions.length ? (
-              <details className="group border-b border-zinc-800">
-                <summary className="flex justify-between items-center font-black uppercase py-6 cursor-pointer list-none hover:text-primary transition-colors">Usage Instructions<ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" /></summary>
-                <div className="pb-8">
-                  <div className="border border-emerald-900/60 bg-emerald-950/20 p-6">
-                    <ol className="space-y-4">
-                      {usageInstructions.map((instruction, index) => (
-                        <li key={`${instruction}-${index}`} className="flex gap-4">
-                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-xs font-black text-emerald-300">{index + 1}</span>
-                          <span className="text-sm leading-relaxed text-zinc-200">{instruction}</span>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                </div>
-              </details>
-            ) : null}
+            <details className="group border-b border-zinc-800">
+              <summary className="flex justify-between items-center font-black uppercase py-6 cursor-pointer list-none hover:text-primary transition-colors">Usage Instructions<ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" /></summary>
+              <div className="pb-8">
+                <ProductInfoSection
+                  icon={<ClipboardList size={18} />}
+                  eyebrow="How to use"
+                  title="Usage Instructions"
+                  body="Follow the label directions and adjust only with guidance from a qualified professional."
+                >
+                  <UsageInstructionsList items={usageInstructions} />
+                </ProductInfoSection>
+              </div>
+            </details>
 
-            {warnings.length ? (
-              <details className="group border-b border-zinc-800">
-                <summary className="flex justify-between items-center font-black uppercase py-6 cursor-pointer list-none hover:text-primary transition-colors">Warnings<ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" /></summary>
-                <div className="pb-8">
-                  <div className="border border-primary/50 bg-primary/10 p-6">
-                    <ul className="space-y-4">
-                      {warnings.map((warning, index) => (
-                        <li key={`${warning}-${index}`} className="flex gap-4">
-                          <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-primary" />
-                          <span className="text-sm leading-relaxed text-red-100">{warning}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </details>
-            ) : null}
+            <details className="group border-b border-zinc-800">
+              <summary className="flex justify-between items-center font-black uppercase py-6 cursor-pointer list-none hover:text-primary transition-colors">Warnings<ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" /></summary>
+              <div className="pb-8">
+                <ProductInfoSection
+                  icon={<ShieldAlert size={18} />}
+                  eyebrow="Safety notes"
+                  title="Warnings"
+                  body="Read warnings carefully before use, especially if you have a medical condition or use medication."
+                  tone="warning"
+                >
+                  <WarningsList items={warnings} />
+                </ProductInfoSection>
+              </div>
+            </details>
           </div>
         </div>
       </section>
@@ -268,6 +262,117 @@ export default function ProductDetail() {
   );
 }
 
+function ProductInfoSection({
+  icon,
+  eyebrow,
+  title,
+  body,
+  tone = 'default',
+  children,
+}: {
+  icon: ReactNode;
+  eyebrow: string;
+  title: string;
+  body: string;
+  tone?: 'default' | 'warning';
+  children: ReactNode;
+}) {
+  const accentClass = tone === 'warning'
+    ? 'border-primary/50 bg-primary/10 text-primary'
+    : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/20">
+      <div className="grid gap-5 border-b border-zinc-800 bg-black/40 p-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-start">
+        <span className={`flex h-11 w-11 items-center justify-center rounded-full border ${accentClass}`}>
+          {icon}
+        </span>
+        <div className="min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">{eyebrow}</p>
+          <h3 className="mt-1 text-2xl font-black uppercase tracking-tighter text-white">{title}</h3>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">{body}</p>
+        </div>
+      </div>
+      <div className="p-4 sm:p-5">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function NutritionFactsTable({ facts }: { facts: [string, string | number | boolean | null | undefined][] }) {
+  if (!facts.length) {
+    return <InfoEmptyState>Nutritional information coming soon.</InfoEmptyState>;
+  }
+
+  return (
+    <div className="overflow-hidden rounded-lg border border-zinc-800 bg-black">
+      <div className="grid grid-cols-[minmax(0,1fr)_minmax(8rem,12rem)] bg-zinc-900 text-xs font-black uppercase tracking-widest text-zinc-300">
+        <div className="border-r border-zinc-800 px-4 py-3">Nutritional Facts</div>
+        <div className="px-4 py-3 text-right">Per Serving</div>
+      </div>
+      <div className="divide-y divide-zinc-800">
+        {facts.map(([key, value]) => (
+          <div key={key} className="grid grid-cols-[minmax(0,1fr)_minmax(8rem,12rem)] transition-colors hover:bg-zinc-950">
+            <div className="border-r border-zinc-800 px-4 py-3 text-sm font-bold uppercase tracking-tight text-zinc-100">
+              {formatNutritionLabel(key)}
+            </div>
+            <div className="px-4 py-3 text-right font-mono text-sm font-bold text-zinc-300">
+              {String(value)}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function UsageInstructionsList({ items }: { items: string[] }) {
+  if (!items.length) {
+    return <InfoEmptyState>Usage instructions coming soon.</InfoEmptyState>;
+  }
+
+  return (
+    <ol className="grid gap-3">
+      {items.map((instruction, index) => (
+        <li key={`${instruction}-${index}`} className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-4 rounded-lg border border-zinc-800 bg-black p-4">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/15 text-sm font-black text-emerald-300">
+            {index + 1}
+          </span>
+          <span className="self-center text-sm leading-relaxed text-zinc-200">{instruction}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function WarningsList({ items }: { items: string[] }) {
+  if (!items.length) {
+    return <InfoEmptyState>Warnings will appear here when available.</InfoEmptyState>;
+  }
+
+  return (
+    <ul className="grid gap-3">
+      {items.map((warning, index) => (
+        <li key={`${warning}-${index}`} className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-4 rounded-lg border border-primary/30 bg-primary/10 p-4">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-black text-white">
+            !
+          </span>
+          <span className="self-center text-sm font-medium leading-relaxed text-red-50">{warning}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function InfoEmptyState({ children }: { children: ReactNode }) {
+  return (
+    <div className="rounded-lg border border-dashed border-zinc-800 bg-black px-4 py-5 text-sm italic text-zinc-500">
+      {children}
+    </div>
+  );
+}
+
 function ProductFact({ label, value }: { label: string; value: string }) {
   return (
     <div className="group relative overflow-hidden rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-950 via-black to-zinc-950 p-5 transition-colors hover:border-primary/60">
@@ -281,6 +386,13 @@ function ProductFact({ label, value }: { label: string; value: string }) {
       </div>
     </div>
   );
+}
+
+function formatNutritionLabel(value: string) {
+  return value
+    .replace(/_/g, ' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function formatProductWeight(weight?: string | number) {
