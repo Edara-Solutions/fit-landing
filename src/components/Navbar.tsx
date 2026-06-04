@@ -12,7 +12,7 @@ const LINKS = [
   { name: 'Products', href: '/products' },
   { name: 'Stacks', href: '/stacks' },
   { name: 'Orders', href: '/orders' },
-  { name: 'About', href: '/about' },
+  // { name: 'About', href: '/about' },
 ];
 
 export default function Navbar() {

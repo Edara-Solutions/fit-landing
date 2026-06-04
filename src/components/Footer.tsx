@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 const FOOTER_LINKS = [
   { name: 'Shipping & Returns', href: '/shipping' },
   { name: 'Privacy Policy', href: '/legal#privacy' },
+  { name: 'About', href: '/about' },
   // { name: 'Terms of Service', href: '/legal#terms' },
   // { name: 'Affiliate Program', href: '/affiliate' },
   // { name: 'Contact', href: '/contact' },
