@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { SITE_CONTACT } from '../config/contact';
 
 const SECTIONS = [
   { id: 'privacy', label: 'Privacy Policy' },
@@ -118,7 +119,7 @@ export default function Legal() {
                 <p>Delivery is available inside Egypt through local shipping companies. Delivery fees are calculated at checkout based on the selected city or governorate. We currently do not offer free delivery.</p>
                 <p>Estimated delivery timing may vary by courier and destination. Cairo and Giza orders usually arrive within 1-3 business days, while other governorates usually arrive within 2-5 business days.</p>
                 <p>Returns are accepted within 14 days of receiving the order, provided the item is in the same condition, unused, unopened, and with its original packaging. Return delivery fees may apply unless otherwise agreed by support.</p>
-                <p>To request a return, contact support with your order number, phone number, and reason for return. We will review the request and guide you through the return process with the shipping company.</p>
+                <p>To request a return, contact support on <a href={SITE_CONTACT.whatsapp.href} target="_blank" rel="noreferrer" className="font-black text-primary hover:text-white transition-colors">WhatsApp at {SITE_CONTACT.whatsapp.display}</a> with your order number, phone number, and reason for return. We will review the request and guide you through the return process with the shipping company.</p>
              </div>
           </section>
         </article>

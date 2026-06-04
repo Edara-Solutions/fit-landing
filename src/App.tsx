@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ContactActions from './components/ContactActions';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import Stacks from './pages/Stacks';
@@ -67,6 +68,7 @@ export default function App() {
             </Routes>
           </AnimatePresence>
         </main>
+        <ContactActions variant="floating" />
         <Footer />
       </div>
     </Router>

@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { Truck, RotateCcw } from 'lucide-react';
+import ContactActions from '../components/ContactActions';
 
 export default function Shipping() {
   return (
@@ -48,6 +49,7 @@ export default function Shipping() {
             <Step number="2" title="Condition Check" text="The product must be in the same condition you received it: unused, unopened, and in its original packaging." />
             <Step number="3" title="Courier Return" text="After approval, we will guide you through returning the package with the shipping company. Return delivery fees may apply." />
           </div>
+          <ContactActions />
         </section>
       </div>
 

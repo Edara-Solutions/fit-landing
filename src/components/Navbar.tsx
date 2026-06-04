@@ -6,11 +6,13 @@ import { cartItems, getId, getName } from '../lib/format';
 import { useAuthStore } from '../stores/auth.store';
 import { useCartStore } from '../stores/cart.store';
 import { useCatalogStore } from '../stores/catalog.store';
+import ContactActions from './ContactActions';
 import logo from '../assets/images/logo.png';
 
 const LINKS = [
   { name: 'Products', href: '/products' },
   { name: 'Stacks', href: '/stacks' },
+  { name: 'Contact', href: '/contact' },
   { name: 'Orders', href: '/orders' },
   // { name: 'About', href: '/about' },
 ];
@@ -173,6 +175,9 @@ export default function Navbar() {
                   Logout
                 </button>
               )}
+              <div className="border-t border-zinc-900 pt-4">
+                <ContactActions onNavigate={closeMobileMenu} />
+              </div>
             </div>
           </motion.div>
         )}

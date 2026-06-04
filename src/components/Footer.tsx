@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
+import ContactActions from './ContactActions';
 
 const FOOTER_LINKS = [
   { name: 'Shipping & Returns', href: '/shipping' },
+  { name: 'Contact', href: '/contact' },
   { name: 'Privacy Policy', href: '/legal#privacy' },
   { name: 'About', href: '/about' },
   // { name: 'Terms of Service', href: '/legal#terms' },
   // { name: 'Affiliate Program', href: '/affiliate' },
-  // { name: 'Contact', href: '/contact' },
 ];
 
 export default function Footer() {
@@ -16,7 +17,7 @@ export default function Footer() {
         <Link to="/" className="text-3xl font-black text-primary tracking-tighter uppercase italic">
           FIT
         </Link>
-        
+
         <div className="flex flex-wrap justify-center gap-x-8 gap-y-4">
           {FOOTER_LINKS.map((link) => (
             <Link
@@ -28,6 +29,8 @@ export default function Footer() {
             </Link>
           ))}
         </div>
+
+        <ContactActions variant="footer" />
 
         <div className="text-[10px] text-zinc-600 font-light uppercase tracking-[0.2em] text-center">
           © {new Date().getFullYear()} FIT SUPPLEMENT. BUILT TO PERFORM.

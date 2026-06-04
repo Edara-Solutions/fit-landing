@@ -1,5 +1,25 @@
 import { motion } from 'motion/react';
-import { Headset, Truck, HelpCircle, ChevronDown } from 'lucide-react';
+import { ChevronDown, Clock3, HelpCircle, MessageCircle, PackageCheck, Store } from 'lucide-react';
+import ContactActions from '../components/ContactActions';
+import { SITE_CONTACT } from '../config/contact';
+
+const CONTACT_HELP_CARDS = [
+  {
+    title: 'Order Support',
+    text: 'Send your order number and the issue so we can check it quickly.',
+    icon: PackageCheck,
+  },
+  {
+    title: 'Stack Advice',
+    text: 'Tell us your goal, budget, and training level before you buy.',
+    icon: MessageCircle,
+  },
+  {
+    title: 'Wholesale',
+    text: 'Call directly for product availability, pricing, and margins.',
+    icon: Store,
+  },
+] as const;
 
 export default function Contact() {
   return (
@@ -29,61 +49,64 @@ export default function Contact() {
       {/* Main Content Area */}
       <section className="max-w-7xl mx-auto px-6 md:px-10 pb-32">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Contact Form */}
-          <div className="lg:col-span-7 bg-zinc-950 p-10 border border-zinc-800 relative overflow-hidden">
+          {/* Contact Actions */}
+          <div className="lg:col-span-8 bg-zinc-950 p-6 md:p-10 border border-zinc-800 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl rounded-full" />
-            <h2 className="text-3xl font-black uppercase text-white mb-10 tracking-tight">Send Transmission</h2>
-            <form className="flex flex-col gap-8 relative z-10">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">First Name</label>
-                  <input className="bg-black border border-zinc-800 text-white p-4 focus:border-primary focus:ring-0 outline-none transition-all placeholder-zinc-700" placeholder="JOHN" />
+            <div className="relative z-10 flex flex-col gap-8">
+              <div>
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <MessageCircle className="h-7 w-7" />
                 </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Last Name</label>
-                  <input className="bg-black border border-zinc-800 text-white p-4 focus:border-primary focus:ring-0 outline-none transition-all placeholder-zinc-700" placeholder="DOE" />
-                </div>
+                <h2 className="text-3xl md:text-4xl font-black uppercase text-white mb-4 tracking-tight">Talk To FIT</h2>
+                <p className="max-w-2xl text-zinc-400">
+                  Order help, product questions, stacks, shipping, and wholesale requests all start here. Choose the channel that is easiest for you and we will respond directly.
+                </p>
               </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Email Address</label>
-                <input className="bg-black border border-zinc-800 text-white p-4 focus:border-primary focus:ring-0 outline-none transition-all placeholder-zinc-700" placeholder="JOHNDOE@EXAMPLE.COM" />
+
+              <ContactActions />
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 border-t border-zinc-800 pt-8">
+                {CONTACT_HELP_CARDS.map((card) => {
+                  const Icon = card.icon;
+
+                  return (
+                    <div key={card.title} className="border border-zinc-900 bg-black/50 p-5 transition-colors hover:border-zinc-700">
+                      <Icon className="mb-4 h-6 w-6 text-primary" />
+                      <h3 className="text-sm font-black uppercase tracking-widest text-white">{card.title}</h3>
+                      <p className="mt-3 text-xs leading-5 text-zinc-500">{card.text}</p>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Inquiry Type</label>
-                <div className="relative">
-                  <select className="w-full appearance-none bg-black border border-zinc-800 text-white py-4 pl-4 pr-12 focus:border-primary outline-none transition-all uppercase text-xs font-bold tracking-widest">
-                    <option>Order Support</option>
-                    <option>Wholesale / Distribution</option>
-                    <option>Athlete Sponsorship</option>
-                    <option>General Transmission</option>
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Message</label>
-                <textarea className="bg-black border border-zinc-800 text-white p-4 focus:border-primary outline-none transition-all placeholder-zinc-700 resize-none min-h-[150px]" placeholder="ENTER YOUR TRANSMISSION..." />
-              </div>
-              <button className="bg-primary text-white font-black uppercase py-5 px-12 rounded-full hover:bg-primary-hover shadow-xl shadow-primary/20 transition-all self-start tracking-widest">
-                Transmit Message
-              </button>
-            </form>
+            </div>
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-5 flex flex-col gap-12">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
-              <div className="bg-zinc-900/50 p-8 border-l-4 border-primary group hover:bg-zinc-900 transition-colors">
-                <Headset className="text-primary w-10 h-10 mb-4" />
-                <h3 className="text-xl font-black uppercase text-white mb-2">Support</h3>
-                <p className="text-sm text-zinc-500 mb-4">Issues with an order? We resolve them with zero downtime.</p>
-                <a href="mailto:support@foxsupps.com" className="text-sm font-black text-primary hover:text-white transition-colors uppercase tracking-widest">support@foxsupps.com</a>
+          <div className="lg:col-span-4 flex flex-col gap-8">
+            <div className="border border-zinc-800 bg-zinc-950 p-8">
+              <div className="flex items-center gap-3 border-b border-zinc-800 pb-6">
+                <Clock3 className="h-6 w-6 text-primary" />
+                <h2 className="text-xl font-black uppercase text-white tracking-widest">Response Guide</h2>
               </div>
-              <div className="bg-zinc-900/50 p-8 border-l-4 border-primary group hover:bg-zinc-900 transition-colors">
-                <Truck className="text-primary w-10 h-10 mb-4" />
-                <h3 className="text-xl font-black uppercase text-white mb-2">Wholesale</h3>
-                <p className="text-sm text-zinc-500 mb-4">Stock FIT in your facility. Aggressive margins available.</p>
-                <a href="mailto:wholesale@foxsupps.com" className="text-sm font-black text-primary hover:text-white transition-colors uppercase tracking-widest">wholesale@foxsupps.com</a>
+              <div className="mt-6 space-y-5">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Fastest Channel</p>
+                  <a href={SITE_CONTACT.whatsapp.href} target="_blank" rel="noreferrer" className="mt-1 block text-lg font-black text-white transition-colors hover:text-primary">
+                    {SITE_CONTACT.whatsapp.display}
+                  </a>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Urgent Calls</p>
+                  <a href={SITE_CONTACT.phone.href} className="mt-1 block text-lg font-black text-white transition-colors hover:text-primary">
+                    {SITE_CONTACT.phone.display}
+                  </a>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Social Updates</p>
+                  <a href={SITE_CONTACT.facebook.href} target="_blank" rel="noreferrer" className="mt-1 block text-lg font-black text-white transition-colors hover:text-primary">
+                    {SITE_CONTACT.facebook.display}
+                  </a>
+                </div>
               </div>
             </div>
 
