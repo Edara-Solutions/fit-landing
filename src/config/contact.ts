@@ -6,8 +6,8 @@ export const SITE_CONTACT = {
   },
   phone: {
     label: 'Call',
-    display: '+20 101 914 5795',
-    href: 'tel:+201019145795',
+    display: '+20 111 102 3745',
+    href: 'tel:+201111023745',
   },
   facebook: {
     label: 'Facebook',
